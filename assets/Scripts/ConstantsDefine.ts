@@ -2,6 +2,7 @@
 export enum TileType {
     default=0,
     testType,
+    obstruct,
 };
 export enum OperateTileType {
     None=0, 

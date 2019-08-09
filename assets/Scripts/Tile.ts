@@ -10,13 +10,24 @@ export class TileBase {
     _tileType:TileType;
 
     Dragable:boolean;
+    Walkable:boolean;
+    Deleteable:boolean;
 
     set tileType (value) {
         if(value == TileType.default){
             this.Dragable = false;
+            this.Walkable = false;
+            this.Deleteable = false;
         }
         if(value == TileType.testType){
             this.Dragable = true;
+            this.Walkable = true;
+            this.Deleteable = false;
+        }
+        if(value == TileType.obstruct){
+            this.Dragable = false;
+            this.Walkable = false;
+            this.Deleteable = true;
         }
         this._tileType = value;
     }
