@@ -40,4 +40,3 @@ export class TileBase {
         this.tileType = tileType;
     }
 }
-

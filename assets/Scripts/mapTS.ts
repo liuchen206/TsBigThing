@@ -4,45 +4,6 @@ import { SearchParameters, AstarPathFinding } from "./AstarPathFinding";
 
 const { ccclass, property } = cc._decorator;
 
-class SearchNode {
-    version: boolean = false;
-    x: number = 0;
-    y: number = 0;
-    links: Array<SearchNode>;
-    linksLength: number = 0;
-    parent: SearchNode = null//MapInfo
-    nowCost: number = 0;
-    mayCost: number = 0;
-    next: SearchNode = null;//MapInfo
-    pre: SearchNode = null;//MapInfo
-    dist: number = 0;
-    constructor(nx: number, ny: number) {
-        this.x = nx;
-        this.y = ny;
-    }
-    addLinks(mapObj: object) {
-        this.links = new Array<SearchNode>();
-        if (this.x > 0) {
-            this.addL((this.x - 1), this.y, mapObj);
-        }
-        if (this.y > 0) {
-            this.addL(this.x, (this.y - 1), mapObj);
-        }
-        this.addL((this.x + 1), this.y,  mapObj);
-        this.addL(this.x, (this.y + 1), mapObj);
-    }
-    addL(tx: number, ty: number,  mapObj: object) {
-        let id = tx + "*" + ty;
-        if (mapObj[id] == null) {
-            this.links.push(new SearchNode(tx, ty));
-            this.linksLength++;
-        }else if(mapObj[id].Walkable == true){
-            this.links.push(new SearchNode(tx, ty));
-            this.linksLength++;
-        }
-    }
-}
-
 @ccclass
 export default class mapTS extends cc.Component {
 
@@ -187,6 +148,9 @@ export default class mapTS extends cc.Component {
         }
     }
     renderTile(tile: TileBase) {
+        // this.graphics.lineJoin = cc.Graphics.LineJoin.ROUND;
+        this.graphics.lineCap = cc.Graphics.LineCap.ROUND;
+        // this.graphics.lineWidth = 10;
         this.graphics.rect(tile.posX * this.mapGridWidth, tile.posY * this.mapGridHeigth, tile.tileWidth, tile.tileHeight);
         this.graphics.fillColor = tile.tileColor;
         this.graphics.fill();
