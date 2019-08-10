@@ -1,6 +1,7 @@
-import { TileBase } from "./Tile";
+import { UnitBase, UnitColor } from "./Tile";
 import { TileType, OperateTileType } from "./ConstantsDefine";
 import { SearchParameters, AstarPathFinding } from "./AstarPathFinding";
+import { UnitIdCreator } from "./Tools";
 
 const { ccclass, property } = cc._decorator;
 
@@ -14,12 +15,11 @@ export default class mapTS extends cc.Component {
     mapHeight: number; // 地图总长
     mapStartPosX: number; // 地图绘制起点x
     mapStartPosY: number; // 地图绘制起点y
-    pathObj: object;
-    startTile: TileBase; // 寻路测试起点
-    endTile: TileBase; // 寻路测试终点
-    bgTile: TileBase; // 地图背景
+    pathObj: Map<string,UnitBase>;
+    startTile: UnitBase; // 寻路测试起点
+    endTile: UnitBase; // 寻路测试终点
     inputOperateType: OperateTileType; // 用户输入后，执行的操作类型
-    selectedTile: TileBase;
+    selectedTile: UnitBase;
 
     _tileNumX: number;
     _tileNumY: number;
@@ -43,25 +43,25 @@ export default class mapTS extends cc.Component {
 
     // update (dt) {}
     init() {
+        
         this.inputOperateType = OperateTileType.None;
         this.mapWidth = cc.view.getVisibleSize().width;
         this.mapHeight = cc.view.getVisibleSize().height;
         this.mapStartPosX = cc.view.getVisibleOrigin().x;
         this.mapStartPosY = cc.view.getVisibleOrigin().y;
-        this.startTile = new TileBase(this.mapGridWidth, this.mapGridHeigth, 5, 10, cc.color(0, 255, 100), TileType.testType);
-        this.endTile = new TileBase(this.mapGridWidth, this.mapGridHeigth, 8, 11, cc.color(255, 0, 0), TileType.testType);
-        this.bgTile = new TileBase(this.mapWidth, this.mapHeight, this.mapStartPosX, this.mapStartPosY, cc.color(255, 255, 255), TileType.default);
-        this.pathObj = {};
-        this.pathObj[this.startTile.posX + "*" + this.startTile.posY] = this.startTile;
-        this.pathObj[this.endTile.posX + "*" + this.endTile.posY] = this.endTile;
+        this.startTile = new UnitColor(UnitIdCreator.getInstance().getNewID(),"startTile",this.mapGridWidth, this.mapGridHeigth, 5, 10,TileType.test ,cc.color(0, 255, 100));
+        this.endTile = new UnitColor(UnitIdCreator.getInstance().getNewID(),"endTile",this.mapGridWidth, this.mapGridHeigth, 8, 11, TileType.test, cc.color(255, 0, 0));
+        this.pathObj = new Map();
+        this.pathObj.set(this.startTile.posX + "*" + this.startTile.posY,this.startTile);
+        this.pathObj.set(this.endTile.posX + "*" + this.endTile.posY,this.endTile);
         cc.Canvas.instance.node.on("mousedown", this.OnMouseDown, this);
     }
     OnMouseDown(e: cc.Touch) {
         let nx = Math.floor(e.getLocationX() / this.mapGridWidth);
         let ny = Math.floor(e.getLocationY() / this.mapGridHeigth);
         cc.log('OnMouseDown', nx, ny);
-        if (this.pathObj[nx + "*" + ny] != null) {
-            this.selectedTile = this.pathObj[nx + "*" + ny];
+        if (this.pathObj.has(nx + "*" + ny)) {
+            this.selectedTile = this.pathObj.get(nx + "*" + ny);
             if (this.selectedTile.Dragable == true) {
                 this.inputOperateType = OperateTileType.Move;
             } else if (this.selectedTile.Deleteable == true) {
@@ -83,33 +83,33 @@ export default class mapTS extends cc.Component {
         let nx = Math.floor(e.getLocationX() / this.mapGridWidth);
         let ny = Math.floor(e.getLocationY() / this.mapGridHeigth);
         if (this.inputOperateType == OperateTileType.Move) {
-            if (this.pathObj[nx + "*" + ny] == null) {
+            if (this.pathObj.has(nx + "*" + ny) == false) {
                 if (this.selectedTile.posX != nx || this.selectedTile.posY != ny) {
-                    this.pathObj[this.selectedTile.posX + "*" + this.selectedTile.posY] = null;
+                    this.pathObj.delete(this.selectedTile.posX + "*" + this.selectedTile.posY);
                     this.selectedTile.posX = nx;
                     this.selectedTile.posY = ny;
-                    this.pathObj[nx + "*" + ny] = this.selectedTile;
+                    this.pathObj.set(nx + "*" + ny,this.selectedTile);
                     this.renderMap();
                 }
             }
         }
         if (this.inputOperateType == OperateTileType.Add) {
-            if (this.pathObj[nx + "*" + ny] == null) {
-                this.pathObj[nx + "*" + ny] = new TileBase(this.mapGridWidth, this.mapGridHeigth, nx, ny, cc.color(150, 150, 150), TileType.obstruct);
+            if (this.pathObj.has(nx + "*" + ny) == false) {
+                this.pathObj.set(nx + "*" + ny,new UnitColor(UnitIdCreator.getInstance().getNewID(),"obstruct",this.mapGridWidth, this.mapGridHeigth, nx, ny,TileType.obstruct, cc.color(150, 150, 150)));
                 this.renderMap();
             } else {
-                if (this.pathObj[nx + "*" + ny].Deleteable == true) {
-                    this.pathObj[nx + "*" + ny] = new TileBase(this.mapGridWidth, this.mapGridHeigth, nx, ny, cc.color(150, 150, 150), TileType.obstruct);
+                if (this.pathObj.get(nx + "*" + ny).Deleteable == true) {
+                    this.pathObj.set(nx + "*" + ny,new UnitColor(UnitIdCreator.getInstance().getNewID(),"obstruct",this.mapGridWidth, this.mapGridHeigth, nx, ny,TileType.obstruct, cc.color(150, 150, 150)));
                     this.renderMap();
                 }
             }
         }
         if (this.inputOperateType == OperateTileType.Delete) {
-            if (this.pathObj[nx + "*" + ny] == null) {
+            if (this.pathObj.has(nx + "*" + ny) == false) {
 
             } else {
-                if (this.pathObj[nx + "*" + ny].Deleteable == true) {
-                    this.pathObj[nx + "*" + ny] = null;
+                if (this.pathObj.get(nx + "*" + ny).Deleteable == true) {
+                    this.pathObj.delete(nx + "*" + ny);
                     this.renderMap();
                 }
             }
@@ -118,11 +118,11 @@ export default class mapTS extends cc.Component {
     }
     renderMap() {
         this.graphics.clear();
-        this.renderTile(this.bgTile);
+        this.drawBG(this.mapStartPosX, this.mapStartPosY, this.mapWidth, this.mapHeight, cc.color(255, 255, 255));
         for (let y = this.mapStartPosY; y < this.tileNumY; y++) {
             for (let x = this.mapStartPosX; x < this.tileNumX; x++) {
-                if (this.pathObj[x + "*" + y] != null) {
-                    this.renderTile(this.pathObj[x + "*" + y]);
+                if (this.pathObj.has(x + "*" + y)) {
+                    this.pathObj.get(x + "*" + y).render(this.graphics)
                 }
                 this.graphics.strokeColor = cc.color(150, 150, 150);
                 this.graphics.rect(this.mapGridWidth * x, this.mapGridHeigth * y, this.mapGridWidth, this.mapGridHeigth);
@@ -147,12 +147,12 @@ export default class mapTS extends cc.Component {
             }
         }
     }
-    renderTile(tile: TileBase) {
+    drawBG(posX:number,posY:number,tileWidth:number,tileHeight:number,tileColor:cc.Color){
         // this.graphics.lineJoin = cc.Graphics.LineJoin.ROUND;
-        this.graphics.lineCap = cc.Graphics.LineCap.ROUND;
+        // this.graphics.lineCap = cc.Graphics.LineCap.ROUND;
         // this.graphics.lineWidth = 10;
-        this.graphics.rect(tile.posX * this.mapGridWidth, tile.posY * this.mapGridHeigth, tile.tileWidth, tile.tileHeight);
-        this.graphics.fillColor = tile.tileColor;
+        this.graphics.rect(posX * this.mapGridWidth, posY * this.mapGridHeigth, tileWidth, tileHeight);
+        this.graphics.fillColor = tileColor;
         this.graphics.fill();
     }
 }

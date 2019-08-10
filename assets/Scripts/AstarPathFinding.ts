@@ -1,14 +1,14 @@
-import { TileBase } from "./Tile";
+import { UnitBase } from "./Tile";
 
 // 地图的原始数据
 export class SearchParameters
 {
     startLocation:cc.Vec2;
     endLocation:cc.Vec2;
-    map:object;
+    map:Map<string,UnitBase>;
     mapWidth:number;
     mapHeight:number;
-    constructor(start:cc.Vec2,end:cc.Vec2,map:object,mapWidth:number,mapHeight:number)
+    constructor(start:cc.Vec2,end:cc.Vec2,map:Map<string,UnitBase>,mapWidth:number,mapHeight:number)
     {
         this.startLocation = start;
         this.endLocation = end;
@@ -62,12 +62,12 @@ export class CellNode
         }
     }
 
-    constructor(location:cc.Vec2,tileBase:TileBase,endLocation:cc.Vec2)
+    constructor(location:cc.Vec2,unitBase:UnitBase,endLocation:cc.Vec2)
     {
-        if(tileBase == null){
+        if(unitBase == null){
             this.isWalkable = true;
         }else{
-            this.isWalkable = tileBase.Walkable;
+            this.isWalkable = unitBase.Walkable;
         }
         this.G = 0;
         this.location = location;
@@ -113,7 +113,7 @@ export class AstarPathFinding {
         this.cellNodes = {};
         for(let i = 0;i<this.height;i++){
             for(let j = 0;j<this.width;j++){
-                this.cellNodes[j+"*"+i] = new CellNode(new cc.Vec2(j,i),this.searchParameters.map[j+"*"+i],this.searchParameters.endLocation);
+                this.cellNodes[j+"*"+i] = new CellNode(new cc.Vec2(j,i),this.searchParameters.map.get(j+"*"+i),this.searchParameters.endLocation);
             }
         }
         this.startNode = this.cellNodes[this.searchParameters.startLocation.x+"*"+this.searchParameters.startLocation.y];
