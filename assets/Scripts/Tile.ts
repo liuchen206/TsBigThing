@@ -22,7 +22,7 @@ export class TileBase {
         if(value == TileType.testType){
             this.Dragable = true;
             this.Walkable = true;
-            this.Deleteable = false;
+            this.Deleteable = true;
         }
         if(value == TileType.obstruct){
             this.Dragable = false;
