@@ -1,0 +1,230 @@
+// Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.  
+
+// Note: Current format version is experiment, the format may be changed.
+// The future format may not be compatible, you may need to update the script manually.
+
+// 注意：当前版本的格式是实验性的，之后还会进行修改。
+// 后续版本的格式不保证兼容当前格式，可能需要手动升级到最新版本。，
+%{
+  techniques: [
+    {
+      passes: [
+        {
+          vert: vs
+          frag: fs
+          cullMode: none
+          blend: true
+        }
+      ]
+      layer: 0
+    }
+  ]
+  properties: {
+    texture: {
+      type: sampler2D
+      value: null
+    }
+    alphaThreshold: {
+      type: number
+      value: 0.5
+    }
+  }
+%}
+
+%% vs {
+
+precision highp float;
+
+uniform mat4 cc_matViewProj;
+
+#if _USE_MODEL
+  uniform mat4 cc_matWorld;
+#endif
+
+attribute vec3 a_position;
+attribute lowp vec4 a_color;
+
+#if USE_TEXTURE
+  attribute mediump vec2 a_uv0;
+  varying mediump vec2 v_uv0;
+#endif
+
+varying lowp vec4 v_color;
+
+void main () {
+  mat4 mvp;
+  
+  #if _USE_MODEL
+    mvp = cc_matViewProj * cc_matWorld;
+  #else
+    mvp = cc_matViewProj;
+  #endif
+
+  #if USE_TEXTURE
+    v_uv0 = a_uv0;
+  #endif
+
+  v_color = a_color;
+
+  gl_Position = mvp * vec4(a_position, 1);
+}
+
+}
+
+%% fs {
+
+precision highp float;
+
+#if USE_TEXTURE
+  uniform sampler2D texture;
+  varying mediump vec2 v_uv0;
+#endif
+
+uniform float iTime;
+uniform float nodeWidth;
+uniform float nodeHeight;
+
+#include <alpha-test>
+
+varying lowp vec4 v_color;
+
+	// 应用贴图UV
+	vec4 draw(vec2 uv) {
+		return texture2D(texture, uv).rgba;
+	}
+	
+	// 随机值
+	float rand(vec2 co) {
+		return fract(sin(dot(co.xy , vec2(12.9898, 78.233))) * 43758.5453);
+	}
+	
+	// 降低亮度
+	vec4 dim(vec4 col, float factor) {
+		return vec4(col.r * factor, col.g * factor, col.b * factor, col.a);
+	}
+  void mainImage( out vec4 fragColor, in vec2 fragCoord )
+  {
+    vec2 iResolution = vec2(nodeWidth,nodeHeight);
+    // vec2 uv = fragCoord.xy / iResolution.xy;// 将坐标转换到0-1之间
+    // fragColor = vec4(uv,0.5+0.5*sin(iTime),1.0);// r，g位置绝对，b随时间变化
+
+    vec2 p = (2.0*fragCoord.xy-iResolution.xy)/iResolution.y;
+    float tau = 3.1415926535*2.0;
+    float a = atan(p.x,p.y);
+    float r = length(p)*0.75;
+    vec2 uv = vec2(a/tau,r);
+    
+    //get the color
+    float xCol = (uv.x - (iTime / 3.0)) * 3.0;
+    xCol = mod(xCol, 3.0);
+    vec3 horColour = vec3(0.25, 0.25, 0.25);
+    
+    if (xCol < 1.0) {
+      
+      horColour.r += 1.0 - xCol;
+      horColour.g += xCol;
+    }
+    else if (xCol < 2.0) {
+      
+      xCol -= 1.0;
+      horColour.g += 1.0 - xCol;
+      horColour.b += xCol;
+    }
+    else {
+      
+      xCol -= 2.0;
+      horColour.b += 1.0 - xCol;
+      horColour.r += xCol;
+    }
+
+    // draw color beam
+    uv = (2.0 * uv) - 1.0;
+    float beamWidth = (0.7+0.5*cos(uv.x*10.0*tau*0.15*clamp(floor(5.0 + 10.0*cos(iTime)), 0.0, 10.0))) * abs(1.0 / (30.0 * uv.y));
+    vec3 horBeam = vec3(beamWidth);
+    fragColor = vec4((( horBeam) * horColour), 1.0);
+  }
+
+void main () {
+  vec4 color = v_color;
+
+  #if USE_TEXTURE
+    color *= texture2D(texture, v_uv0);
+    #if _USE_ETC1_TEXTURE
+      color.a *= texture2D(texture, v_uv0 + vec2(0, 0.5)).r;
+    #endif
+  #endif
+
+  ALPHA_TEST(color);
+
+  gl_FragColor = color;
+
+  /***
+    定制代码片段着色
+  */
+  vec2 iResolution = vec2(nodeWidth,nodeHeight);
+  vec2 fragCoord = v_uv0.xy*iResolution.xy; 
+  // to shaderjoy
+  mainImage(gl_FragColor,fragCoord);
+
+  // if(v_uv0.x*iResolution.x > 50.0){
+  //   gl_FragColor = vec4(v_uv0.xy,0.5+0.5*sin(iTime),1.0);// r，g位置绝对，b随时间变化。
+  // }else{
+  //   gl_FragColor = vec4(1,1,1,1.0);// r，g位置绝对，b随时间变化。
+  // }
+
+
+  // 灰色
+  // float gray = 0.2126*color.r + 0.7152*color.g + 0.0722*color.b;
+  // float gray = iTime*color.r + iTime*color.g + iTime*color.b;
+  // gl_FragColor = vec4(gray, gray, gray, color.a);
+
+  // 渐隐
+  // float temp = v_uv0.x - iTime; 
+  // if (temp <= 0.0) {
+  //   float temp2 = abs(temp);
+  //   if (temp2 <= 0.2) {
+  //     gl_FragColor.w = 1.0 - temp2/0.2;
+  //   } else {
+  //     gl_FragColor.w = 0.0;
+  //   }
+  // } else {
+  //   gl_FragColor.w = 1.0;
+  // }
+
+  // 模糊处理
+  // 重复次数，值越大模糊质量越高，但性能越低
+  // #define repeats 16.0
+
+  // // 贴图UV值
+  // vec2 uv = v_uv0.xy;
+
+  // // 模糊值
+  // float bluramount = 0.08 * 0.5;
+  
+  // // 模糊贴图
+  // vec4 blurred_image = vec4(0.0);
+  
+  // // 重复采样
+  // for(float i = 0.0; i < repeats; i ++ ) {
+  //   // 第一采样点
+  //   vec2 q = vec2(cos(degrees((i / repeats) * 360.0)), sin(degrees((i / repeats) * 360.0))) * (rand(vec2(i, uv.x + uv.y)) + bluramount);
+  //   vec2 uv2 = uv + (q * bluramount);
+  //   blurred_image += draw(uv2) / 2.0; 
+    
+  //   // 第二采样点
+  //   q = vec2(cos(degrees((i / repeats) * 360.0)), sin(degrees((i / repeats) * 360.0))) * (rand(vec2(i + 2.0, uv.x + uv.y + 24.0)) + bluramount);
+  //   uv2 = uv + (q * bluramount);
+  //   blurred_image += draw(uv2) / 2.0;
+  // }
+
+  // // 中和
+  // blurred_image /= repeats;
+
+  // // 降低亮度
+  // blurred_image = dim(blurred_image, 0.5);
+
+  // // 导出颜色
+  // gl_FragColor = vec4(blurred_image);
+}
+
+}

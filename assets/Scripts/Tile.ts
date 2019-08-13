@@ -39,7 +39,8 @@ export class UnitBase implements appearance{
 
 export class UnitColor extends UnitBase{
     render(graphics: cc.Graphics): void {
-        graphics.rect(this.posX * this.tileWidth, this.posY * this.tileHeight, this.tileWidth, this.tileHeight);
+        graphics.circle(this.posX * this.tileWidth +this.tileWidth/2, this.posY * this.tileHeight+this.tileHeight/2, this.tileWidth/2);
+        // graphics.rect(this.posX * this.tileWidth, this.posY * this.tileHeight, this.tileWidth, this.tileHeight);
         graphics.fillColor = this.tileColor;
         graphics.fill();
     }
