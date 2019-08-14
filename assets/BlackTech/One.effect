@@ -1,0 +1,153 @@
+// Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.  
+
+// Note: Current format version is experiment, the format may be changed.
+// The future format may not be compatible, you may need to update the script manually.
+
+// 注意：当前版本的格式是实验性的，之后还会进行修改。
+// 后续版本的格式不保证兼容当前格式，可能需要手动升级到最新版本。，
+%{
+  techniques: [
+    {
+      passes: [
+        {
+          vert: vs
+          frag: fs
+          cullMode: none
+          blend: true
+        }
+      ]
+      layer: 0
+    }
+  ]
+  properties: {
+    texture: {
+      type: sampler2D
+      value: null
+    }
+    alphaThreshold: {
+      type: number
+      value: 0.5
+    }
+  }
+%}
+
+%% vs {
+
+precision highp float;
+
+uniform mat4 cc_matViewProj;
+
+#if _USE_MODEL
+  uniform mat4 cc_matWorld;
+#endif
+
+attribute vec3 a_position;
+attribute lowp vec4 a_color;
+
+#if USE_TEXTURE
+  attribute mediump vec2 a_uv0;
+  varying mediump vec2 v_uv0;
+#endif
+
+varying lowp vec4 v_color;
+
+void main () {
+  mat4 mvp;
+  
+  #if _USE_MODEL
+    mvp = cc_matViewProj * cc_matWorld;
+  #else
+    mvp = cc_matViewProj;
+  #endif
+
+  #if USE_TEXTURE
+    v_uv0 = a_uv0;
+  #endif
+
+  v_color = a_color;
+
+  gl_Position = mvp * vec4(a_position, 1);
+}
+
+}
+
+%% fs {
+
+precision highp float;
+
+#if USE_TEXTURE
+  uniform sampler2D texture;
+  varying mediump vec2 v_uv0;
+#endif
+
+uniform float iTime;
+uniform float nodeWidth;
+uniform float nodeHeight;
+
+#include <alpha-test>
+
+varying lowp vec4 v_color;
+
+#define NB 1.
+#define MAX_VEL .5
+
+// Distance to a fish
+float sdFish(float i, vec2 p, float a) {
+    // p = vec2(.5,.5);
+    float ds, c = cos(a), s = sin(a);
+    p *= 20.*mat2(c,s,-s,c); // Rotate and rescale
+    p.x *= .97 + (.04+.2*p.y)*cos(i+9.*iTime);  // Swiming ondulation (+rotate in Z axes)
+    ds = min(length(p-vec2(.8,0))-.45, length(p-vec2(-.14,0))-.12);   // Distance to fish
+    p.y = abs(p.y)+.13;
+    return max(min(length(p),length(p-vec2(.56,0)))-.3,-ds)*.05;
+}
+
+void mainImage(out vec4 cout,in vec2 uv) {
+  vec2 iResolution = vec2(nodeWidth,nodeHeight);
+  vec2 p = 1./iResolution.xy; 
+  float d, m = 1e6;
+  vec4 c, ct, fish;
+
+  for(float i=0.; i<NB; i++) {       
+      vec4 color = v_color;
+      #if USE_TEXTURE
+        color *= texture2D(texture, v_uv0);
+        #if _USE_ETC1_TEXTURE
+          color.a *= texture2D(texture, v_uv0 + vec2(0, 0.5)).r;
+        #endif
+      #endif
+
+      fish = color; // (xy = position, zw = velocity) 
+      m = min(m, d = sdFish(i, fish.xy-uv.xy*p.y, atan(fish.w,fish.z))); // Draw fish according to its direction
+      // Background color sum based on fish velocity (blue => red) + Halo - simple version: c*smoothstep(.5,0.,d);
+      ct += mix(vec4(0,0,1,1), vec4(1,0,0,1), length(fish.zw)/MAX_VEL)*(2./(1.+3e3*d*d*d) + .5/(1.+30.*d*d)); 
+  }
+  // Mix fish color (white) and Halo
+  cout = mix(vec4(1.),.5*sqrt(ct/NB), smoothstep(0.,p.y*1.2, m));
+}
+
+void main () { 
+  vec4 color = v_color;
+
+  #if USE_TEXTURE
+    color *= texture2D(texture, v_uv0);
+    #if _USE_ETC1_TEXTURE
+      color.a *= texture2D(texture, v_uv0 + vec2(0, 0.5)).r;
+    #endif
+  #endif
+
+  ALPHA_TEST(color);
+
+  // gl_FragColor = color;
+  // gl_FragColor = vec4(0.0,0.0,0.0,0.2);
+
+  /***
+    定制代码片段着色
+  */
+  vec2 iResolution = vec2(nodeWidth,nodeHeight);
+  vec2 fragCoord = v_uv0.xy*iResolution.xy; 
+  // to shaderjoy
+  mainImage(gl_FragColor,fragCoord);
+}
+
+}

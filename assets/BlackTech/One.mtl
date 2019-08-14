@@ -9,5 +9,7 @@
   "_defines": {
     "USE_TEXTURE": true
   },
-  "_props": {}
+  "_props": {
+    "texture": null
+  }
 }
