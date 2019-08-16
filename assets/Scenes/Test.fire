@@ -624,8 +624,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 0,
-      "height": 0
+      "width": 32,
+      "height": 32
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -642,7 +642,7 @@
       "__type__": "cc.Vec3",
       "x": 0.6,
       "y": 0.6,
-      "z": 0.6
+      "z": 1
     },
     "_eulerAngles": {
       "__type__": "cc.Vec3",
@@ -684,8 +684,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 49,
-      "height": 35
+      "width": 40,
+      "height": 23
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -734,10 +734,10 @@
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
     "_spriteFrame": {
-      "__uuid__": "32cc05b4-185f-4069-8a58-828cbfd36a03"
+      "__uuid__": "c9a8a226-d7a1-4d4b-a8a6-69f07123e431"
     },
     "_type": 0,
-    "_sizeMode": 0,
+    "_sizeMode": 1,
     "_fillType": 0,
     "_fillCenter": {
       "__type__": "cc.Vec2",
@@ -769,6 +769,73 @@
       "__id__": 15
     },
     "_enabled": true,
+    "spriteRender": {
+      "__id__": 17
+    },
+    "fishFreshSpriteList": [
+      {
+        "__uuid__": "09d60b6e-0814-478c-a668-8c09f7a8ab5a"
+      },
+      {
+        "__uuid__": "635453eb-2cd0-42a6-adc7-566e06739a4b"
+      },
+      {
+        "__uuid__": "c9a8a226-d7a1-4d4b-a8a6-69f07123e431"
+      },
+      {
+        "__uuid__": "93f0d1a1-b6c5-4b99-804f-bb8dec303fe4"
+      },
+      {
+        "__uuid__": "3fb526fb-6c3c-4a5a-ab4d-3cd8ed64c1a5"
+      },
+      {
+        "__uuid__": "c362ea5b-a3ed-4dc8-b69b-121874e5633b"
+      },
+      {
+        "__uuid__": "08b187ea-9f92-4a2c-a48e-4fb837387e21"
+      },
+      {
+        "__uuid__": "fa10ae9c-4c0d-4df3-aaef-001081da9b47"
+      },
+      {
+        "__uuid__": "2c25683f-cba2-42ce-b640-06fd64e95d88"
+      },
+      {
+        "__uuid__": "93c8c137-b775-4d65-b1ba-dd4e5bb559ea"
+      }
+    ],
+    "fishBoneSpriteList": [
+      {
+        "__uuid__": "32cc05b4-185f-4069-8a58-828cbfd36a03"
+      },
+      {
+        "__uuid__": "a2b87f2d-cb5d-4123-85ba-3638b123b814"
+      },
+      {
+        "__uuid__": "87acbb08-b679-4b74-b036-e072ae57fcd0"
+      },
+      {
+        "__uuid__": "f0e92b30-bc6b-4508-b94e-4bf6a4a42542"
+      },
+      {
+        "__uuid__": "0df8b279-dd7a-4d23-94cf-2ff75f7e55d0"
+      },
+      {
+        "__uuid__": "2b4d9672-f2a8-4b1f-adc0-ba56c61decb8"
+      },
+      {
+        "__uuid__": "460d3b02-1113-40a1-be4a-1cdeab4d525b"
+      },
+      {
+        "__uuid__": "225eeb57-b69f-4a9a-9bea-25fa3d3e7f49"
+      },
+      {
+        "__uuid__": "888bc22b-f884-4546-b570-4cbaea4ef0ba"
+      },
+      {
+        "__uuid__": "574f0dff-1161-44be-a743-707f0f4d9e6e"
+      }
+    ],
     "_id": "f6H6iZpb5E247iQ+eLiDUW"
   },
   {
@@ -790,7 +857,7 @@
       "__id__": 14
     },
     "_enabled": true,
-    "FishsNum": 20,
+    "FishsNum": 0,
     "FishPrefab": {
       "__uuid__": "a12ec5b0-0bf9-43fd-8a2b-68b2d0d11f63"
     },

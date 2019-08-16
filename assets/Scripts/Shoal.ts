@@ -36,7 +36,7 @@ export default class NewClass extends cc.Component {
             // LcLog("fish index ",i);
             let fishNode = this.node.children[i];
             let fishTS:Fish = fishNode.getComponent('Fish');
-            fishTS.init(i);
+            fishTS.init(i,i);
         }
     }
 }

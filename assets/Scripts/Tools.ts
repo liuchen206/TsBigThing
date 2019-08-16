@@ -1,5 +1,5 @@
 export function LcLog(...val){
-    cc.log("liuchen",val);
+    cc.log("lc",val);
 }
 
 export class UnitIdCreator{
