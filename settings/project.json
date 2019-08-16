@@ -2,7 +2,17 @@
   "assets-sort-type": "name",
   "collision-matrix": [
     [
+      false
+    ],
+    [
+      false,
+      false,
       true
+    ],
+    [
+      false,
+      true,
+      false
     ]
   ],
   "design-resolution-height": 640,
@@ -21,15 +31,16 @@
   "fit-height": true,
   "fit-width": false,
   "group-list": [
-    "default"
+    "default",
+    "fishfresh",
+    "fishbone"
   ],
   "last-module-event-record-time": 1565686462315,
   "simulator-orientation": false,
   "simulator-resolution": {
-    "height": 640,
-    "width": 960
+    "height": 2436,
+    "width": 1125
   },
-  "start-scene": "current",
-  "use-customize-simulator": true,
+  "use-customize-simulator": false,
   "use-project-simulator-setting": true
 }

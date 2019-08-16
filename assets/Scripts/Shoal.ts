@@ -28,6 +28,9 @@ export default class NewClass extends cc.Component {
     }
 
     init(){
+        let manager = cc.director.getCollisionManager();
+        manager.enabled = true;
+        // manager.enabledDebugDraw = true;
         for(let i = 0;i< this.FishsNum;i++){
             let fish = cc.instantiate(this.FishPrefab);
             this.node.addChild(fish);

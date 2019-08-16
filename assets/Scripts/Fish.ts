@@ -42,8 +42,8 @@ enum ShoalShape{
 class FishState{
     private _currentState:FishStateType = FishStateType.Fresh;
     CurrentStreeingState:StreeingStateType = StreeingStateType.Peace;
-    CurrentShoalShape:ShoalShape = ShoalShape.Circle;
-    DangerPosition:cc.Vec2 = cc.Vec2.ZERO;
+    CurrentShoalShape:ShoalShape = ShoalShape.Circle;    
+    SportRatio:number = 1;
     get CurrentState(){
         return this._currentState;
     }
@@ -52,9 +52,11 @@ class FishState{
             this._currentState = value;
             if(value = FishStateType.Fresh){
                 this.CurrentStreeingState = StreeingStateType.Peace;
+                this.SportRatio = 1;
             }
             if(value = FishStateType.Bone){
                 this.CurrentStreeingState = StreeingStateType.Violent;
+                this.SportRatio = 1.5;
             }
         }
     }
@@ -65,8 +67,15 @@ class FishState{
 
 @ccclass
 export default class Fish extends cc.Component {
-    MAX_ACC: number = 3.;
-    MAX_VEL: number = .5;
+    VelocityScaleRatio:number = 800;
+    _MAX_ACC: number = 3.;
+    get MAX_ACC(){
+        return this._MAX_ACC*this.fishState.SportRatio;
+    }
+    _MAX_VEL: number = .5;
+    get MAX_VEL(){
+        return this._MAX_VEL*this.fishState.SportRatio;
+    }
     RESIST: number = .2;
     Resolution: cc.Vec2 = cc.Vec2.ZERO;
     Vel: cc.Vec2 = cc.Vec2.ZERO;
@@ -102,9 +111,8 @@ export default class Fish extends cc.Component {
     // LIFE-CYCLE CALLBACKS:
     // onLoad () {
     // }
-    start () {
-        // this.SwitchState(FishStateType.Bone);
-    }
+    // start () {
+    // }
     // update (dt) {
     //     this.DoStreeing(dt);
     // }
@@ -124,19 +132,28 @@ export default class Fish extends cc.Component {
 
         this.ChangeRender(this.fishSpriteFrameIndex,this.fishState.CurrentState);
     }
+    onCollisionEnter(other, self) {
+        // LcLog("onCollisionEnter");
+        if(this.fishState.CurrentState == FishStateType.Fresh){
+            this.SwitchState(FishStateType.Bone);
+        }
+    }
     ChangeRender(newSpriteIndex:number,fishStateType:FishStateType){
         if(fishStateType == FishStateType.Fresh){
             this.spriteRender.spriteFrame = this.fishFreshSpriteList[newSpriteIndex];
+            this.node.group = "fishfresh";
+            // this.node.groupIndex
         }
         if(fishStateType == FishStateType.Bone){
             this.spriteRender.spriteFrame = this.fishBoneSpriteList[newSpriteIndex];
+            this.node.group = "fishbone";
         }
     }
     ShoalWithShape(x:number,y:number,shape:ShoalShape){
         for(let i =0;i<this.node.parent.childrenCount;i++){
             let fishNode = this.node.parent.children[i];
             let fishTS:Fish = fishNode.getComponent('Fish');
-            if(this.id != fishTS.id){
+            if(this.id != fishTS.id && fishTS.fishState.CurrentState == FishStateType.Fresh){
                 let fishIx = MapNum(fishTS.node.x,0,this.mapWidth,0,1);
                 let fishIy = MapNum(fishTS.node.y,0,this.mapHeight,0,1);
                 let w = new cc.Vec2(x,y).sub(new cc.Vec2(fishIx,fishIy));
@@ -165,8 +182,49 @@ export default class Fish extends cc.Component {
         let w:cc.Vec2 = left.sub(right);
         this.SumF.addSelf(w.normalize().mul(.65).mul(1/w.dot(w)));
     }
-    CatchWithPosition(){
-
+    CatchWithPosition(x:number,y:number,catchX:number,catchY:number){
+        let left = new cc.Vec2(x,y);
+        let right = new cc.Vec2(catchX,catchY);
+        let w:cc.Vec2 = right.sub(left);
+        this.SumF.addSelf(w.normalize().mul(.65).mul(1/w.dot(w)));
+    }
+    getNearestBoneFish(x:number,y:number){
+        let shorestDistance = 1;
+        let targetFishTS:Fish;
+        for(let i =0;i<this.node.parent.childrenCount;i++){
+            let fishNode = this.node.parent.children[i];
+            let fishTS:Fish = fishNode.getComponent('Fish');
+            if(this.id != fishTS.id && fishTS.fishState.CurrentState == FishStateType.Bone){
+                let fishIx = MapNum(fishTS.node.x,0,this.mapWidth,0,1);
+                let fishIy = MapNum(fishTS.node.y,0,this.mapHeight,0,1);
+                let w = new cc.Vec2(x,y).sub(new cc.Vec2(fishIx,fishIy));
+                let dis = w.mag();
+                if(dis < shorestDistance){
+                    shorestDistance = dis;
+                    targetFishTS = fishTS;
+                }
+            }
+        }
+        return targetFishTS;
+    }
+    getNearestFreshFish(x:number,y:number){
+        let shorestDistance = 1;
+        let targetFishTS:Fish;
+        for(let i =0;i<this.node.parent.childrenCount;i++){
+            let fishNode = this.node.parent.children[i];
+            let fishTS:Fish = fishNode.getComponent('Fish');
+            if(this.id != fishTS.id && fishTS.fishState.CurrentState == FishStateType.Fresh){
+                let fishIx = MapNum(fishTS.node.x,0,this.mapWidth,0,1);
+                let fishIy = MapNum(fishTS.node.y,0,this.mapHeight,0,1);
+                let w = new cc.Vec2(x,y).sub(new cc.Vec2(fishIx,fishIy));
+                let dis = w.mag();
+                if(dis < shorestDistance){
+                    shorestDistance = dis;
+                    targetFishTS = fishTS;
+                }
+            }
+        }
+        return targetFishTS;
     }
     DoStreeing(dt): cc.Vec2 {
         // Borders action 默认行为（碰到边界返回屏幕中心--- 整个生命周期中一直生效） 
@@ -192,19 +250,38 @@ export default class Fish extends cc.Component {
             if(this.fishState.CurrentStreeingState == StreeingStateType.Peace){
                 // Calculate repulsion force with other fishs
                 this.ShoalWithShape(x,y,this.fishState.CurrentShoalShape);
+
                 // Mouse action
                 if (this.touchState.IsActive() == true) {
                     let mouseX = MapNum(this.touchState.getTouchPosX(),0,this.mapWidth,0,1);
                     let mouseY = MapNum(this.touchState.getTouchPosY(),0,this.mapHeight,0,1);
                     this.FleeWithPostion(x,y,mouseX,mouseY);
                 }
+
+                let targetFishTS = this.getNearestBoneFish(x,y);
+                if(targetFishTS != null){
+                    let fleeX = MapNum(targetFishTS.node.x,0,this.mapWidth,0,1);
+                    let fleeY = MapNum(targetFishTS.node.y,0,this.mapHeight,0,1);
+                    this.FleeWithPostion(x,y,fleeX,fleeY);
+                }
             }
             if(this.fishState.CurrentStreeingState == StreeingStateType.Naughty){
-                // TODO
+                
             }
         }
         if(this.fishState.CurrentState == FishStateType.Bone){
+            // if (this.touchState.IsActive() == true) {
+            //     let mouseX = MapNum(this.touchState.getTouchPosX(),0,this.mapWidth,0,1);
+            //     let mouseY = MapNum(this.touchState.getTouchPosY(),0,this.mapHeight,0,1);
+            //     this.CatchWithPosition(x,y,mouseX,mouseY);
+            // }
 
+            let targetFishTS = this.getNearestFreshFish(x,y);
+            if(targetFishTS != null){
+                let catchX = MapNum(targetFishTS.node.x,0,this.mapWidth,0,1);
+                let catchY = MapNum(targetFishTS.node.y,0,this.mapHeight,0,1);
+                this.CatchWithPosition(x,y,catchX,catchY);
+            }
         }
 
         // Friction 计算阻力
@@ -219,8 +296,22 @@ export default class Fish extends cc.Component {
         this.Vel = this.Vel.mag() > this.MAX_VEL ? this.Vel.normalize().mul(this.MAX_VEL) : this.Vel;
 
         // - 移动位置 velocity of fish (xy = position, zw = velocity) 
-        this.node.x += MapNum(this.Vel.x,0,this.MAX_VEL,0,this.MAX_VEL*1200) * dt;
-        this.node.y += MapNum(this.Vel.y,0,this.MAX_VEL,0,this.MAX_VEL*1200) * dt;
+        this.node.x += MapNum(this.Vel.x,0,this.MAX_VEL,0,this.MAX_VEL*this.VelocityScaleRatio) * dt;
+        this.node.y += MapNum(this.Vel.y,0,this.MAX_VEL,0,this.MAX_VEL*this.VelocityScaleRatio) * dt;
+
+        let positionLimitEdge = 50 
+        if(this.node.x < -positionLimitEdge){
+            this.node.x = this.mapWidth+positionLimitEdge;
+        }
+        if(this.node.x > this.mapWidth+positionLimitEdge){
+            this.node.x = -positionLimitEdge;
+        }
+        if(this.node.y < -positionLimitEdge){
+            this.node.y = this.mapHeight+positionLimitEdge;
+        }
+        if(this.node.y > this.mapHeight+positionLimitEdge){
+            this.node.y = -positionLimitEdge;
+        }
 
         // 计算朝向（角度）
         var angle = cc.Vec2.RIGHT.signAngle(this.Vel);
@@ -237,7 +328,11 @@ export default class Fish extends cc.Component {
     }
     OnMySelfTouchDown(e: cc.Touch) {
         LcLog('OnMySelfTouchDowne' ,this.id);
-
+        if(FishStateType.Bone == this.fishState.CurrentState){
+            this.SwitchState(FishStateType.Fresh);
+        }else if(FishStateType.Fresh == this.fishState.CurrentState){
+            this.SwitchState(FishStateType.Bone);
+        }
     }
     OnTouchDown(e: cc.Touch) {
         let nx = e.getLocationX();
