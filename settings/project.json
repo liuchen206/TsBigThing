@@ -36,10 +36,10 @@
     "fishbone"
   ],
   "last-module-event-record-time": 1565686462315,
-  "simulator-orientation": false,
+  "simulator-orientation": true,
   "simulator-resolution": {
-    "height": 2436,
-    "width": 1125
+    "height": 1920,
+    "width": 1080
   },
   "use-customize-simulator": false,
   "use-project-simulator-setting": true

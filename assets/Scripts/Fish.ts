@@ -56,7 +56,7 @@ class FishState{
             }
             if(value = FishStateType.Bone){
                 this.CurrentStreeingState = StreeingStateType.Violent;
-                this.SportRatio = 1.5;
+                this.SportRatio = 1.2;
             }
         }
     }
@@ -153,7 +153,8 @@ export default class Fish extends cc.Component {
         for(let i =0;i<this.node.parent.childrenCount;i++){
             let fishNode = this.node.parent.children[i];
             let fishTS:Fish = fishNode.getComponent('Fish');
-            if(this.id != fishTS.id && fishTS.fishState.CurrentState == FishStateType.Fresh){
+            if(this.id != fishTS.id){
+            // if(this.id != fishTS.id && fishTS.fishState.CurrentState == FishStateType.Fresh){
                 let fishIx = MapNum(fishTS.node.x,0,this.mapWidth,0,1);
                 let fishIy = MapNum(fishTS.node.y,0,this.mapHeight,0,1);
                 let w = new cc.Vec2(x,y).sub(new cc.Vec2(fishIx,fishIy));
@@ -270,6 +271,7 @@ export default class Fish extends cc.Component {
             }
         }
         if(this.fishState.CurrentState == FishStateType.Bone){
+            this.ShoalWithShape(x,y,this.fishState.CurrentShoalShape);
             // if (this.touchState.IsActive() == true) {
             //     let mouseX = MapNum(this.touchState.getTouchPosX(),0,this.mapWidth,0,1);
             //     let mouseY = MapNum(this.touchState.getTouchPosY(),0,this.mapHeight,0,1);
