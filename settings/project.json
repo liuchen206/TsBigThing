@@ -2,7 +2,10 @@
   "assets-sort-type": "name",
   "collision-matrix": [
     [
-      false
+      true,
+      null,
+      null,
+      true
     ],
     [
       false,
@@ -12,6 +15,19 @@
     [
       false,
       true,
+      false
+    ],
+    [
+      true,
+      false,
+      false,
+      true
+    ],
+    [
+      false,
+      false,
+      false,
+      false,
       false
     ]
   ],
@@ -33,14 +49,17 @@
   "group-list": [
     "default",
     "fishfresh",
-    "fishbone"
+    "fishbone",
+    "waterdrop",
+    "bg"
   ],
-  "last-module-event-record-time": 1565686462315,
-  "simulator-orientation": true,
+  "last-module-event-record-time": 1567676003330,
+  "simulator-orientation": false,
   "simulator-resolution": {
     "height": 1920,
     "width": 1080
   },
   "use-customize-simulator": false,
-  "use-project-simulator-setting": true
+  "use-project-simulator-setting": true,
+  "start-scene": "current"
 }

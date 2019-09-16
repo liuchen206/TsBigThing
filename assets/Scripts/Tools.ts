@@ -27,3 +27,7 @@ export function MapNum(targetNum:number,srcStart:number,srcEnd:number,targetStar
     var targetOffset = targetNum - srcStart;
     return targetStart+targetOffset/srcArea*targetArea;
 };
+
+export function MakeXYToKey(x:number,y:number){
+    return x+"+"+y;
+}
