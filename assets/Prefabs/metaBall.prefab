@@ -40,8 +40,8 @@
     "_color": {
       "__type__": "cc.Color",
       "r": 255,
-      "g": 255,
-      "b": 255,
+      "g": 0,
+      "b": 0,
       "a": 255
     },
     "_contentSize": {
@@ -56,7 +56,7 @@
     },
     "_position": {
       "__type__": "cc.Vec3",
-      "x": -36.565,
+      "x": 175.721,
       "y": -93.538,
       "z": 0
     },
@@ -141,7 +141,7 @@
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 1,
     "_spriteFrame": {
-      "__uuid__": "7c5ef73f-b7e5-4aa0-abc4-9756747861d9"
+      "__uuid__": "58af64ff-9743-4c57-b168-f893486c38df"
     },
     "_type": 0,
     "_sizeMode": 0,

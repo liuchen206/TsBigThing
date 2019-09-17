@@ -16,7 +16,7 @@ export default class NewClass extends cc.Component {
     }
 
     start () {
-        // this.generateNewCell(300);
+        this.generateNewCell(300);
     }
 
     // update (dt) {}

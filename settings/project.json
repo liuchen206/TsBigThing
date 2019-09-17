@@ -53,13 +53,13 @@
     "waterdrop",
     "bg"
   ],
-  "last-module-event-record-time": 1567676003330,
+  "last-module-event-record-time": 1568703369715,
   "simulator-orientation": false,
   "simulator-resolution": {
     "height": 1920,
     "width": 1080
   },
+  "start-scene": "current",
   "use-customize-simulator": false,
-  "use-project-simulator-setting": true,
-  "start-scene": "current"
+  "use-project-simulator-setting": true
 }

@@ -107,12 +107,19 @@ void main () {
   // gl_FragColor = color;
 
   vec4 c = v_color*texture2D(texture, v_uv0);
+
+    // if(v_uv0.x > 0.3) {
+    //   c.a = 1.0;
+    // }
+    // else{
+    //   c.a = 0.0;
+    // }
     if(c.a > 0.925) {
       c.a = 1.0;
     }
-    else if(c.a > 0.90){
-      c.a = 0.2;
-    }
+    // else if(c.a > 0.90){
+    //   c.a = 0.2;
+    // }
     else{
       c.a = 0.0;
     }
