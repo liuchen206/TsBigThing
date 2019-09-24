@@ -16,15 +16,15 @@ export default class customMask extends cc.Component {
     // onLoad () {}
 
     start () {
-        this.updateMaskRender();
+        this.updateMaskRender(this.getComponent(cc.PhysicsPolygonCollider).points);
     }
     update (dt) {
         this.drowDebugInfo();
         // this.updateMaskRender();
     }
-    updateMaskRender(){
+    updateMaskRender(pointsArray: cc.Vec2[]){
         // 获取多边形的点
-        let pointsPol = this.getComponent(cc.PhysicsPolygonCollider).points;
+        let pointsPol = pointsArray;
         // 获取材质
         this.material = this.sprite.getMaterial(0);
 
@@ -45,7 +45,7 @@ export default class customMask extends cc.Component {
         this.ctx.clear();
         for (let i = 0; i < pointsPol.length; i++) {
             let p = pointsPol[i];
-            p = this.node.convertToWorldSpaceAR(p);
+            // p = this.node.convertToWorldSpaceAR(p);
             this.ctx.circle(p.x, p.y, 5);
         }  
         this.ctx.fill();
