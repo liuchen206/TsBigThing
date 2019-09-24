@@ -4,7 +4,7 @@ import { LcLog } from "./Tools";
 const {ccclass, property} = cc._decorator;
 
 @ccclass
-export default class NewClass extends cc.Component {
+export default class Shoal extends cc.Component {
     // LIFE-CYCLE CALLBACKS:
 
     // onLoad () {}

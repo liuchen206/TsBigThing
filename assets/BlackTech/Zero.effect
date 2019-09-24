@@ -83,6 +83,13 @@ precision highp float;
 uniform float iTime;
 uniform float nodeWidth;
 uniform float nodeHeight;
+uniform vec2 pologenPoints_1;
+uniform vec2 pologenPoints_2;
+uniform vec2 pologenPoints_3;
+uniform vec2 pologenPoints_4;
+uniform vec2 pologenPoints_5;
+
+uniform int Points_Num;
 
 #include <alpha-test>
 
@@ -142,6 +149,55 @@ varying lowp vec4 v_color;
     fragColor = vec4(rgb.xyz, 1.0);
   }
 
+bool innerNgonFill( vec2 uv, vec2 PPi , vec2 PPj , bool isInner )
+{
+    if (( PPi.y < uv.y && PPj.y >= uv.y || PPj.y < uv.y && PPi.y >= uv.y ) && ( PPi.x <= uv.x || PPj.x <= uv.x )) 
+    {
+        if ( PPi.x + ( uv.y - PPi.y ) / ( PPj.y -PPi.y ) * ( PPj.x - PPi.x ) < uv.x ) 
+        {
+            isInner=!isInner; 
+        }
+    }  
+
+    return isInner;
+}
+
+bool ngonFill( vec2 uv )
+{
+    
+    bool  isInner = false;
+    if(Points_Num < 1){ 
+    }else{
+      // instead for 
+      vec2 points[100]; 
+      points[0] = pologenPoints_1;  
+      points[1] = pologenPoints_2;  
+      points[2] = pologenPoints_3;  
+      points[3] = pologenPoints_4;  
+      points[4] = pologenPoints_5; 
+      for(int i =0;i< 4 ;i++){
+        isInner = innerNgonFill( uv , points[i] , points[i+1] , isInner ) ;        
+      }
+      isInner = innerNgonFill( uv , points[4] , points[0] , isInner ) ;        
+
+      // isInner = innerNgonFill( uv , points[0] , points[1] , isInner ) ;        
+      // isInner = innerNgonFill( uv , points[1] , points[2] , isInner ) ;        
+      // isInner = innerNgonFill( uv , points[2] , points[3] , isInner ) ;        
+      // isInner = innerNgonFill( uv , points[3] , points[4] , isInner ) ;        
+      // isInner = innerNgonFill( uv , points[4] , points[0] , isInner ) ;         
+
+      // isInner = innerNgonFill( uv , pologenPoints_1 , pologenPoints_2 , isInner ) ;        
+      // isInner = innerNgonFill( uv , pologenPoints_2 , pologenPoints_3 , isInner ) ;
+      // isInner = innerNgonFill( uv , pologenPoints_3 , pologenPoints_4 , isInner ) ;
+      // isInner = innerNgonFill( uv , pologenPoints_4 , pologenPoints_5 , isInner ) ;
+      // isInner = innerNgonFill( uv , pologenPoints_5 , pologenPoints_1 , isInner ) ;
+      // isInner = innerNgonFill( uv , PP[  8 ] , PP[  7 ] , isInner ) ;
+      // isInner = innerNgonFill( uv , PP[  9 ] , PP[  8 ] , isInner ) ;
+      // isInner = innerNgonFill( uv , PP[ 10 ] , PP[  9 ] , isInner ) ;
+
+    }
+    return isInner;   
+} 
 void main () {
   vec4 color = v_color;
 
@@ -154,7 +210,6 @@ void main () {
 
   ALPHA_TEST(color);
 
-  gl_FragColor = color;
 
   /***
     定制代码片段着色
@@ -162,13 +217,19 @@ void main () {
   vec2 iResolution = vec2(nodeWidth,nodeHeight);
   vec2 fragCoord = v_uv0.xy*iResolution.xy; 
   // to shaderjoy
-  mainImage(gl_FragColor,fragCoord);
+  // mainImage(gl_FragColor,fragCoord);
 
-  // if(v_uv0.x*iResolution.x > 50.0){
-  //   gl_FragColor = vec4(v_uv0.xy,0.5+0.5*sin(iTime),1.0);// r，g位置绝对，b随时间变化。
-  // }else{
-  //   gl_FragColor = vec4(1,1,1,1.0);// r，g位置绝对，b随时间变化。
-  // }
+  if(ngonFill(v_uv0)){
+  // if(v_uv0.y*iResolution.y > 50.0){
+  // if(v_uv0.x > pologenPoints.x){
+    // gl_FragColor = vec4(v_uv0.xy,0.5+0.5*sin(iTime),1.0);// r，g位置绝对，b随时间变化。
+    color.a = 1.0;
+  }else{
+    // gl_FragColor = vec4(1,1,1,1.0);// r，g位置绝对，b随时间变化。
+    color.a = 0.0;
+  }
+
+  gl_FragColor = color;
 
 
   // 灰色
@@ -176,7 +237,7 @@ void main () {
   // float gray = iTime*color.r + iTime*color.g + iTime*color.b;
   // gl_FragColor = vec4(gray, gray, gray, color.a);
 
-  // 渐隐
+  // // 渐隐
   // float temp = v_uv0.x - iTime; 
   // if (temp <= 0.0) {
   //   float temp2 = abs(temp);
@@ -189,8 +250,8 @@ void main () {
   //   gl_FragColor.w = 1.0;
   // }
 
-  // 模糊处理
-  // 重复次数，值越大模糊质量越高，但性能越低
+  // // 模糊处理
+  // // 重复次数，值越大模糊质量越高，但性能越低
   // #define repeats 16.0
 
   // // 贴图UV值

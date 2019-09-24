@@ -1,0 +1,157 @@
+// Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.  
+
+// Note: Current format version is experiment, the format may be changed.
+// The future format may not be compatible, you may need to update the script manually.
+
+// 注意：当前版本的格式是实验性的，之后还会进行修改。
+// 后续版本的格式不保证兼容当前格式，可能需要手动升级到最新版本。，
+%{
+  techniques: [
+    {
+      passes: [
+        {
+          vert: vs
+          frag: fs
+          cullMode: none
+          blend: true
+        }
+      ]
+      layer: 0
+    }
+  ]
+  properties: {
+    texture: {
+      type: sampler2D
+      value: null
+    }
+    alphaThreshold: {
+      type: number
+      value: 0.5
+    }
+  }
+%}
+
+%% vs {
+
+precision highp float;
+
+uniform mat4 cc_matViewProj;
+
+#if _USE_MODEL
+  uniform mat4 cc_matWorld;
+#endif
+
+attribute vec3 a_position;
+attribute lowp vec4 a_color;
+
+#if USE_TEXTURE
+  attribute mediump vec2 a_uv0;
+  varying mediump vec2 v_uv0;
+#endif
+
+varying lowp vec4 v_color;
+
+void main () {
+  mat4 mvp;
+  
+  #if _USE_MODEL
+    mvp = cc_matViewProj * cc_matWorld;
+  #else
+    mvp = cc_matViewProj;
+  #endif
+
+  #if USE_TEXTURE
+    v_uv0 = a_uv0;
+  #endif
+
+  v_color = a_color;
+
+  gl_Position = mvp * vec4(a_position, 1);
+}
+
+}
+
+%% fs {
+
+precision highp float;
+
+#if USE_TEXTURE
+  uniform sampler2D texture;
+  varying mediump vec2 v_uv0;
+#endif
+
+uniform vec2 pologenPoints_1;
+uniform vec2 pologenPoints_2;
+uniform vec2 pologenPoints_3;
+uniform vec2 pologenPoints_4;
+uniform vec2 pologenPoints_5;
+uniform vec2 pologenPoints_6;
+uniform vec2 pologenPoints_close;
+
+uniform int Points_Num;
+
+#include <alpha-test>
+
+varying lowp vec4 v_color;
+
+bool innerNgonFill( vec2 uv, vec2 PPi , vec2 PPj , bool isInner )
+{
+    if (( PPi.y < uv.y && PPj.y >= uv.y || PPj.y < uv.y && PPi.y >= uv.y ) && ( PPi.x <= uv.x || PPj.x <= uv.x )) 
+    {
+        if ( PPi.x + ( uv.y - PPi.y ) / ( PPj.y -PPi.y ) * ( PPj.x - PPi.x ) < uv.x ) 
+        {
+            isInner=!isInner; 
+        }
+    }  
+
+    return isInner;
+}
+
+bool ngonFill( vec2 uv )
+{
+    bool  isInner = false;
+    // instead for 
+    vec2 points[33]; 
+    points[0] = pologenPoints_1;  
+    points[1] = pologenPoints_2;  
+    points[2] = pologenPoints_3;  
+    points[3] = pologenPoints_4;  
+    points[4] = pologenPoints_5; 
+    points[5] = pologenPoints_6; 
+    for(int i = 0;i < 33 ;i++){
+      if(i < Points_Num){
+        isInner = innerNgonFill( uv , points[i] , points[i+1] , isInner ) ;     
+      }else{
+        break;
+      }
+    }
+    return isInner;   
+} 
+void main () {
+  vec4 color = v_color;
+
+  #if USE_TEXTURE
+    color *= texture2D(texture, v_uv0);
+    #if _USE_ETC1_TEXTURE
+      color.a *= texture2D(texture, v_uv0 + vec2(0, 0.5)).r; 
+    #endif
+  #endif
+
+  ALPHA_TEST(color);
+
+  if(Points_Num >= 3){
+    vec2 uv = v_uv0;
+    uv -= .5;
+    uv.y *= -1.0; 
+    if(ngonFill(uv)){  
+    // if(uv.y > 0.0){
+      // color.a = 1.0;
+    }else{
+      color.a = 0.0;
+    }
+  }
+
+  gl_FragColor = color;
+}
+
+}

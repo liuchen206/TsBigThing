@@ -1,4 +1,5 @@
 import { LcLog } from "./Tools";
+import customMask from "./customMask";
 
 // Learn TypeScript:
 //  - [Chinese] https://docs.cocos.com/creator/manual/zh/scripting/typescript.html
@@ -13,7 +14,9 @@ import { LcLog } from "./Tools";
 const {ccclass, property} = cc._decorator;
 
 @ccclass
-export default class NewClass extends cc.Component {
+export default class physicalCutting extends cc.Component {
+    @property(cc.Prefab)
+    rectPrefab:cc.Prefab;
     EPSILON = 0.1;
     POINT_SQR_EPSILON = 5;
     ctx:cc.Graphics;
@@ -90,8 +93,7 @@ export default class NewClass extends cc.Component {
 
                     if (r) {
                         pair.splice(pair.indexOf(r), 1);
-                    }
-                    else { 
+                    }else { 
                         pair.push(result);
                     }
 
@@ -153,6 +155,7 @@ export default class NewClass extends cc.Component {
             // keep max length points to origin collider
             (collider as unknown as cc.PolygonCollider).points = maxPointsResult;
             collider.apply();
+            (collider.node.getComponent("customMask") as customMask).updateMaskRender();
 
             let body = collider.body;
 
@@ -163,16 +166,27 @@ export default class NewClass extends cc.Component {
                 if (splitResult == maxPointsResult) continue;
 
                 // create new body
-                let node = new cc.Node();
+                // let node = new cc.Node();
+                // node.position = body.getWorldPosition(new cc.Vec2());
+                // node.rotation = body.getWorldRotation();
+                // node.parent = cc.director.getScene();
+                
+                // node.addComponent(cc.RigidBody);
+                
+                // let newCollider = node.addComponent(cc.PhysicsPolygonCollider);
+                // newCollider.points = splitResult;
+                // newCollider.apply();
+
+                // create new body use Prefab
+                let node = cc.instantiate(this.rectPrefab);
                 node.position = body.getWorldPosition(new cc.Vec2());
                 node.rotation = body.getWorldRotation();
                 node.parent = cc.director.getScene();
-                
-                node.addComponent(cc.RigidBody);
-                
-                let newCollider = node.addComponent(cc.PhysicsPolygonCollider);
+                node.getComponent(cc.RigidBody).type = cc.RigidBodyType.Dynamic;
+                let newCollider = node.getComponent(cc.PhysicsPolygonCollider);
                 newCollider.points = splitResult;
                 newCollider.apply();
+                (node.getComponent("customMask") as customMask).updateMaskRender();
             }
             
         }
@@ -204,14 +218,14 @@ export default class NewClass extends cc.Component {
         this.r2 = r2;
         this.results = results;
     }
-    split (collider, p1, p2, splitResults) {
+    split (collider: cc.PhysicsCollider, p1: cc.Vec2, p2: cc.Vec2, splitResults: Array<Array<cc.Vec2>>) {
         let body = collider.body;
         let points = (collider as unknown as cc.PolygonCollider).points;
 
 
         // The manager.rayCast() method returns points in world coordinates, so use the body.getLocalPoint() to convert them to local coordinates.
-        p1 = body.getLocalPoint(p1);
-        p2 = body.getLocalPoint(p2);
+        p1 = body.getLocalPoint(p1,new cc.Vec2());
+        p2 = body.getLocalPoint(p2,new cc.Vec2());
 
 
         let newSplitResult1 = [p1, p2];
@@ -293,16 +307,16 @@ export default class NewClass extends cc.Component {
         splitResults.push(newSplitResult1);
         splitResults.push(newSplitResult2);
     }
-    equalsVec2(a,b) {
+    equalsVec2(a: cc.Vec2,b: cc.Vec2 ) {
         return this.equals(a.x, b.x) && this.equals(a.y, b.y);
     }
-    pointInLine (point, a, b) {
+    pointInLine (point: cc.Vec2, a: cc.Vec2, b: cc.Vec2) {
         return cc.Intersection.pointLineDistance(point, a, b, true) < 1;
     }
     equals (a: number, b: number) {
         return Math.abs(a-b) < this.EPSILON;
     }
-    compare(a, b) {
+    compare(a:cc.PhysicsRayCastResult, b:cc.PhysicsRayCastResult) {
         if (a.fraction > b.fraction) {
             return 1;
         } else if (a.fraction < b.fraction) {

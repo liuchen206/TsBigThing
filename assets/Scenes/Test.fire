@@ -356,13 +356,13 @@
     "_enabled": true,
     "_materials": [
       {
-        "__uuid__": "663b3c55-0ad8-42e7-a6c1-c6490b032b2d"
+        "__uuid__": "204f41e4-b8dd-4170-b63b-8a37d2339843"
       }
     ],
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
     "_spriteFrame": {
-      "__uuid__": "a23235d1-15db-4b95-8439-a2e005bfff91"
+      "__uuid__": "0547569b-d8d1-4a8b-8319-b8352d4ed614"
     },
     "_type": 0,
     "_sizeMode": 0,
@@ -542,7 +542,7 @@
         "__id__": 15
       }
     ],
-    "_active": true,
+    "_active": false,
     "_level": 1,
     "_components": [
       {
