@@ -27,6 +27,7 @@ export default class physicalCutting extends cc.Component {
     results: Array<cc.PhysicsRayCastResult>;
     touchStartPoint: cc.Vec2; // 触摸的起点
     touchPoint: cc.Vec2;// 当前的触摸点
+    lateUpdateColloderList:cc.Node[] = new Array<cc.Node>();
     // LIFE-CYCLE CALLBACKS:
 
     onLoad() {
@@ -59,6 +60,7 @@ export default class physicalCutting extends cc.Component {
     }
     onTouchEnd(event: cc.Event.EventTouch) {
         LcLog("onTouchEnd");
+
         this.touchPoint = cc.v2(event.touch.getLocation());
         this.recalcResults();
         this.touching = false;
@@ -157,10 +159,11 @@ export default class physicalCutting extends cc.Component {
             // keep max length points to origin collider
             (collider as unknown as cc.PolygonCollider).points = maxPointsResult;
             collider.apply();
-            let reorderArray = this.ClockwiseSortPoints(maxPointsResult);
-            (collider.node.getComponent("customMask") as customMask).updateMaskRender(reorderArray);
-
             let body = collider.body;
+
+            this.lateUpdateColloderList.push(collider.node);
+            let polPoints = collider.node.getComponent(cc.PhysicsPolygonCollider).points;
+            (collider.node.getComponent("customMask") as customMask).updateMaskRender(polPoints);
 
             for (let j = 0; j < splitResults.length; j++) {
                 let splitResult = splitResults[j];
@@ -181,7 +184,7 @@ export default class physicalCutting extends cc.Component {
                 // newCollider.apply();
 
                 // create new body use Prefab
-                let node = cc.instantiate(this.rectPrefab);
+                let node = cc.instantiate(collider.node) 
                 node.position = body.getWorldPosition(new cc.Vec2());
                 node.rotation = body.getWorldRotation();
                 node.parent = cc.director.getScene();
@@ -189,8 +192,10 @@ export default class physicalCutting extends cc.Component {
                 let newCollider = node.getComponent(cc.PhysicsPolygonCollider);
                 newCollider.points = splitResult;
                 newCollider.apply();
-                let reorderArray = this.ClockwiseSortPoints(splitResult);
-                (node.getComponent("customMask") as customMask).updateMaskRender(reorderArray);
+
+                this.lateUpdateColloderList.push(newCollider.node);
+                let polPoints = newCollider.node.getComponent(cc.PhysicsPolygonCollider).points;
+                (newCollider.node.getComponent("customMask") as customMask).updateMaskRender(polPoints);
             }
 
         }
