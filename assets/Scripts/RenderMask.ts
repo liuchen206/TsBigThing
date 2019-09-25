@@ -34,7 +34,7 @@ export default class RenderMask extends cc.Component {
         if (this.sprite) {
             this.sprite.node.active = true;
             this.sprite.spriteFrame = new cc.SpriteFrame(this.renderTexture);
-            this.sprite.setState(0);
+            // this.sprite.setState(0);
         }
     }
 

@@ -15,13 +15,14 @@ export default class Water extends cc.Component {
     }
 
     start () {
-        // this.generateNewCell(300);
+        this.generateNewCell(80);
     }
 
     // update (dt) {}
 
     generateNewCell(num:number){
         for(var i =0;i < num;i++){
+            cc.log("generateNewCell")
             let cellNode = cc.instantiate(this.waterPrefab);
             cellNode.parent = this.node;
             cellNode.x = this.generatePoint.x;
