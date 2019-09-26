@@ -1,5 +1,6 @@
 import { LcLog } from "./Tools";
 import customMask from "./customMask";
+import Water from "./Water";
 
 // Learn TypeScript:
 //  - [Chinese] https://docs.cocos.com/creator/manual/zh/scripting/typescript.html
@@ -15,9 +16,11 @@ const { ccclass, property } = cc._decorator;
 
 @ccclass
 export default class physicalCutting extends cc.Component {
+    @property(cc.Node)
+    waterCreatorNode :cc.Node;
     @property(cc.Prefab)
     rectPrefab: cc.Prefab;
-    EPSILON = 0.1;
+    EPSILON = 5.1;
     POINT_SQR_EPSILON = 5;
     @property(cc.Graphics)
     ctx: cc.Graphics;
@@ -27,7 +30,7 @@ export default class physicalCutting extends cc.Component {
     results: Array<cc.PhysicsRayCastResult>;
     touchStartPoint: cc.Vec2; // 触摸的起点
     touchPoint: cc.Vec2;// 当前的触摸点
-    lateUpdateColloderList: cc.Node[] = new Array<cc.Node>();
+    
     // LIFE-CYCLE CALLBACKS:
 
     onLoad() {
@@ -40,12 +43,10 @@ export default class physicalCutting extends cc.Component {
     }
 
     start() {
-        let testList = [new cc.Vec2(0, 0), new cc.Vec2(100, 200), new cc.Vec2(100, 0), new cc.Vec2(0, 200)];
-        let resultLilt = this.ClockwiseSortPoints(testList);
     }
 
     update(dt) {
-        this.recalcResults();
+        // this.recalcResults();
     }
 
     onTouchStart(event: cc.Event.EventTouch) {
@@ -57,15 +58,15 @@ export default class physicalCutting extends cc.Component {
     onTouchMove(event: cc.Event.EventTouch) {
         // LcLog("onTouchMove");
         this.touchPoint = cc.v2(event.touch.getLocation());
-    }
-    onTouchEnd(event: cc.Event.EventTouch) {
-        // LcLog("onTouchEnd");
 
-        this.touchPoint = cc.v2(event.touch.getLocation());
         this.recalcResults();
-        this.touching = false;
+        // this.touching = false;
 
         let point = cc.v2(event.touch.getLocation());
+        if(this.touchStartPoint.sub(point).magSqr() > 300*300){
+            // (this.waterCreatorNode.getComponent("Water") as Water).generateNewCell(10,this.touchStartPoint.add(this.touchPoint.sub(this.touchStartPoint).mul(0.5)));
+            this.touchStartPoint = this.touchPoint = cc.v2(event.touch.getLocation());
+        }
         if (this.equals(this.touchStartPoint.sub(point).magSqr(), 0)) return;
 
         // recalculate fraction, make fraction from one direction
@@ -161,9 +162,13 @@ export default class physicalCutting extends cc.Component {
             collider.apply();
             let body = collider.body;
 
-            this.lateUpdateColloderList.push(collider.node);
             let polPoints = collider.node.getComponent(cc.PhysicsPolygonCollider).points;
             (collider.node.getComponent("customMask") as customMask).updateMaskRender(polPoints);
+
+            // 生成水滴
+            (this.waterCreatorNode.getComponent("Water") as Water).generateNewCell(10,this.touchStartPoint.add(this.touchPoint.sub(this.touchStartPoint).mul(0.5)));
+            // 切割成功之后 重置其实触摸点
+            this.touchStartPoint = this.touchPoint = cc.v2(event.touch.getLocation());
 
             for (let j = 0; j < splitResults.length; j++) {
                 let splitResult = splitResults[j];
@@ -193,14 +198,22 @@ export default class physicalCutting extends cc.Component {
                 newCollider.points = splitResult;
                 newCollider.apply();
 
-                this.lateUpdateColloderList.push(newCollider.node);
                 let polPoints = newCollider.node.getComponent(cc.PhysicsPolygonCollider).points;
                 (newCollider.node.getComponent("customMask") as customMask).updateMaskRender(polPoints);
             }
 
         }
+        return;
+    }
+    onTouchEnd(event: cc.Event.EventTouch) {
+        // LcLog("onTouchEnd");
+
+        this.touchPoint = cc.v2(event.touch.getLocation());
+
+        
 
     }
+    
     recalcResults() {
         if (!this.touching) return;
         let point = this.touchPoint;
@@ -216,6 +229,9 @@ export default class physicalCutting extends cc.Component {
         let r2 = manager.rayCast(point, this.touchStartPoint, cc.RayCastType.All);
 
         let results = r1.concat(r2);
+        if(results == undefined){
+            return;
+        }
         for (let i = 0; i < results.length; i++) {
             let oneRayResult = results[i];
             if(oneRayResult.collider.node.getComponent("customMask")){
@@ -224,11 +240,11 @@ export default class physicalCutting extends cc.Component {
                 results.splice(i, 1);
             }
         }
-        for (let i = 0; i < results.length; i++) {
-            let p = results[i].point;
-            this.ctx.circle(p.x, p.y, 5);
-        }
-        this.ctx.fill();
+        // for (let i = 0; i < results.length; i++) {
+        //     let p = results[i].point;
+        //     this.ctx.circle(p.x, p.y, 5);
+        // }
+        // this.ctx.fill();
 
         this.r1 = r1;
         this.r2 = r2;
@@ -237,8 +253,10 @@ export default class physicalCutting extends cc.Component {
     split(collider: cc.PhysicsCollider, p1: cc.Vec2, p2: cc.Vec2, splitResults: Array<Array<cc.Vec2>>) {
         let body = collider.body;
         let points = (collider as unknown as cc.PolygonCollider).points;
-
-
+        if(points == undefined){
+            splitResults = [];
+            return;
+        }
         // The manager.rayCast() method returns points in world coordinates, so use the body.getLocalPoint() to convert them to local coordinates.
         p1 = body.getLocalPoint(p1, new cc.Vec2());
         p2 = body.getLocalPoint(p2, new cc.Vec2());
@@ -340,52 +358,5 @@ export default class physicalCutting extends cc.Component {
 
         }
         return 0;
-    }
-    ClockwiseSortPoints(SrcvPoints: Array<cc.Vec2>) {
-        let vPoints = SrcvPoints.concat([]);
-        //计算重心
-        let center: cc.Vec2 = cc.Vec2.ZERO;
-        let X = 0, Y = 0;
-        for (let i = 0; i < vPoints.length; i++) {
-            X += vPoints[i].x;
-            Y += vPoints[i].y;
-        }
-        center.x = Math.floor(X) / vPoints.length;
-        center.y = Math.floor(Y) / vPoints.length;
-        //冒泡排序
-        for (let i = 0; i < vPoints.length - 1; i++) {
-            for (let j = 0; j < vPoints.length; j++) {
-                if (j < vPoints.length - 1) {
-                    if (this.PointCmp(vPoints[j], vPoints[j + 1], center)) {
-                        let tmp = vPoints[j];
-                        vPoints[j] = vPoints[j + 1];
-                        vPoints[j + 1] = tmp;
-                    }
-                } else {
-                    if (this.PointCmp(vPoints[j], vPoints[0], center)) {
-                        let tmp = vPoints[j];
-                        vPoints[j] = vPoints[0];
-                        vPoints[0] = tmp;
-                    }
-                }
-            }
-        }
-
-        return vPoints;
-    }
-    //若点a大于点b,即点a在点b顺时针方向,返回true,否则返回false
-    PointCmp(a: cc.Vec2, b: cc.Vec2, center: cc.Vec2) {
-        if (a.x >= 0 && b.x < 0)
-            return true;
-        //向量OA和向量OB的叉积
-        let det = Math.floor((a.x - center.x) * (b.y - center.y) - (b.x - center.x) * (a.y - center.y));
-        if (det < 0)
-            return true;
-        if (det > 0)
-            return false;
-        //向量OA和向量OB共线，以距离判断大小
-        let d1 = (a.x - center.x) * (a.x - center.x) + (a.y - center.y) * (a.y - center.y);
-        let d2 = (b.x - center.x) * (b.x - center.y) + (b.y - center.y) * (b.y - center.y);
-        return d1 > d2;
     }
 }
