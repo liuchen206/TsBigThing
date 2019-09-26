@@ -161,7 +161,7 @@ export default class physicalCutting extends cc.Component {
             (collider as unknown as cc.PolygonCollider).points = maxPointsResult;
             collider.apply();
             let body = collider.body;
-            body.applyLinearImpulse(new cc.Vec2(Math.random()*300-150,Math.random()*300-150),body.getLocalCenter(),true);
+            body.applyLinearImpulse(new cc.Vec2(Math.random()*150-75,Math.random()*150-75),body.getLocalCenter(),true);
 
             collider.node.getComponent(cc.RigidBody).type = cc.RigidBodyType.Dynamic;
             let polPoints = collider.node.getComponent(cc.PhysicsPolygonCollider).points;
@@ -200,7 +200,7 @@ export default class physicalCutting extends cc.Component {
                 newCollider.points = splitResult;
                 newCollider.apply();
 
-                node.getComponent(cc.RigidBody).applyLinearImpulse(new cc.Vec2(Math.random()*300-150,Math.random()*300-150),node.getComponent(cc.RigidBody).getLocalCenter(),true);
+                node.getComponent(cc.RigidBody).applyLinearImpulse(new cc.Vec2(Math.random()*150-75,Math.random()*150-75),node.getComponent(cc.RigidBody).getLocalCenter(),true);
                 let polPoints = newCollider.node.getComponent(cc.PhysicsPolygonCollider).points;
                 (newCollider.node.getComponent("customMask") as customMask).updateMaskRender(polPoints);
             }
