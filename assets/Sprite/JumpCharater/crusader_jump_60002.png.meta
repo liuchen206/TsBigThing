@@ -1,12 +1,10 @@
 {
-  "ver": "2.3.3",
+  "ver": "2.3.1",
   "uuid": "6c9c1cb9-cdbf-44b2-b2f0-4103d52d6f48",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
   "premultiplyAlpha": false,
-  "genMipmaps": false,
-  "packable": true,
   "platformSettings": {},
   "subMetas": {
     "crusader_jump_60002": {

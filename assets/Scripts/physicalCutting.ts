@@ -27,7 +27,7 @@ export default class physicalCutting extends cc.Component {
     results: Array<cc.PhysicsRayCastResult>;
     touchStartPoint: cc.Vec2; // 触摸的起点
     touchPoint: cc.Vec2;// 当前的触摸点
-    lateUpdateColloderList:cc.Node[] = new Array<cc.Node>();
+    lateUpdateColloderList: cc.Node[] = new Array<cc.Node>();
     // LIFE-CYCLE CALLBACKS:
 
     onLoad() {
@@ -49,17 +49,17 @@ export default class physicalCutting extends cc.Component {
     }
 
     onTouchStart(event: cc.Event.EventTouch) {
-        LcLog("onTouchStart");
+        // LcLog("onTouchStart");
         this.touching = true;
         this.r1 = this.r2 = this.results = null;
         this.touchStartPoint = this.touchPoint = cc.v2(event.touch.getLocation());
     }
     onTouchMove(event: cc.Event.EventTouch) {
-        LcLog("onTouchMove");
+        // LcLog("onTouchMove");
         this.touchPoint = cc.v2(event.touch.getLocation());
     }
     onTouchEnd(event: cc.Event.EventTouch) {
-        LcLog("onTouchEnd");
+        // LcLog("onTouchEnd");
 
         this.touchPoint = cc.v2(event.touch.getLocation());
         this.recalcResults();
@@ -184,9 +184,9 @@ export default class physicalCutting extends cc.Component {
                 // newCollider.apply();
 
                 // create new body use Prefab
-                let node = cc.instantiate(collider.node) 
+                let node = cc.instantiate(collider.node)
                 node.position = body.getWorldPosition(new cc.Vec2());
-                node.rotation = body.getWorldRotation();
+                node.angle  = -body.getWorldRotation();
                 node.parent = cc.director.getScene();
                 node.getComponent(cc.RigidBody).type = cc.RigidBodyType.Dynamic;
                 let newCollider = node.getComponent(cc.PhysicsPolygonCollider);
@@ -216,7 +216,14 @@ export default class physicalCutting extends cc.Component {
         let r2 = manager.rayCast(point, this.touchStartPoint, cc.RayCastType.All);
 
         let results = r1.concat(r2);
-
+        for (let i = 0; i < results.length; i++) {
+            let oneRayResult = results[i];
+            if(oneRayResult.collider.node.getComponent("customMask")){
+                
+            }else{
+                results.splice(i, 1);
+            }
+        }
         for (let i = 0; i < results.length; i++) {
             let p = results[i].point;
             this.ctx.circle(p.x, p.y, 5);
@@ -346,17 +353,15 @@ export default class physicalCutting extends cc.Component {
         center.x = Math.floor(X) / vPoints.length;
         center.y = Math.floor(Y) / vPoints.length;
         //冒泡排序
-        for (let i = 0; i < vPoints.length - 1; i++)
-        {
-            for (let j = 0; j < vPoints.length; j++)
-            {
+        for (let i = 0; i < vPoints.length - 1; i++) {
+            for (let j = 0; j < vPoints.length; j++) {
                 if (j < vPoints.length - 1) {
                     if (this.PointCmp(vPoints[j], vPoints[j + 1], center)) {
                         let tmp = vPoints[j];
                         vPoints[j] = vPoints[j + 1];
                         vPoints[j + 1] = tmp;
                     }
-                }else {
+                } else {
                     if (this.PointCmp(vPoints[j], vPoints[0], center)) {
                         let tmp = vPoints[j];
                         vPoints[j] = vPoints[0];

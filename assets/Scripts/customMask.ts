@@ -55,7 +55,7 @@ export default class customMask extends cc.Component {
         return result;
     }
     drowDebugInfo(){
-        for (let i = 0; i < 6; i++) {
+        for (let i = 0; i < this.labelNodes.length; i++) {
             this.labelNodes[i].node.active = false;
         }
 
@@ -67,9 +67,11 @@ export default class customMask extends cc.Component {
                 let p = pointsPol[i];
                 // p = this.node.convertToWorldSpaceAR(p);
                 this.ctx.circle(p.x, p.y, 5);
-                this.labelNodes[i].node.position = p;
-                this.labelNodes[i].node.active = true;
-                this.labelNodes[i].string = i+1+"";
+                if(this.labelNodes[i]){
+                    this.labelNodes[i].node.position = p;
+                    this.labelNodes[i].node.active = true;
+                    this.labelNodes[i].string = i+1+"";
+                }
             }  
             this.ctx.fill();
         }
