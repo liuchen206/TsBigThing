@@ -161,13 +161,15 @@ export default class physicalCutting extends cc.Component {
             (collider as unknown as cc.PolygonCollider).points = maxPointsResult;
             collider.apply();
             let body = collider.body;
+            body.applyLinearImpulse(new cc.Vec2(Math.random()*300-150,Math.random()*300-150),body.getLocalCenter(),true);
 
+            collider.node.getComponent(cc.RigidBody).type = cc.RigidBodyType.Dynamic;
             let polPoints = collider.node.getComponent(cc.PhysicsPolygonCollider).points;
             (collider.node.getComponent("customMask") as customMask).updateMaskRender(polPoints);
 
             // 生成水滴
             (this.waterCreatorNode.getComponent("Water") as Water).generateNewCell(10,this.touchStartPoint.add(this.touchPoint.sub(this.touchStartPoint).mul(0.5)));
-            // 切割成功之后 重置其实触摸点
+            // 切割成功之后 重置初始触摸点
             this.touchStartPoint = this.touchPoint = cc.v2(event.touch.getLocation());
 
             for (let j = 0; j < splitResults.length; j++) {
@@ -198,6 +200,7 @@ export default class physicalCutting extends cc.Component {
                 newCollider.points = splitResult;
                 newCollider.apply();
 
+                node.getComponent(cc.RigidBody).applyLinearImpulse(new cc.Vec2(Math.random()*300-150,Math.random()*300-150),node.getComponent(cc.RigidBody).getLocalCenter(),true);
                 let polPoints = newCollider.node.getComponent(cc.PhysicsPolygonCollider).points;
                 (newCollider.node.getComponent("customMask") as customMask).updateMaskRender(polPoints);
             }
