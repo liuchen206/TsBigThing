@@ -180,7 +180,7 @@
       "__type__": "cc.Vec3",
       "x": 0,
       "y": 0,
-      "z": 525.6774200971543
+      "z": 831.3843876330611
     },
     "_scale": {
       "__type__": "cc.Vec3",
@@ -273,7 +273,7 @@
       "__type__": "cc.Vec3",
       "x": 0,
       "y": 0,
-      "z": 525.6774200971543
+      "z": 831.3843876330611
     },
     "_scale": {
       "__type__": "cc.Vec3",
@@ -432,7 +432,7 @@
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
     "_spriteFrame": {
-      "__uuid__": "0547569b-d8d1-4a8b-8319-b8352d4ed614"
+      "__uuid__": "70ecd316-2694-4a79-81e0-eb8dbbdfd1bc"
     },
     "_type": 0,
     "_sizeMode": 0,
@@ -3835,7 +3835,7 @@
       "__type__": "cc.Vec3",
       "x": 0,
       "y": 0,
-      "z": 45
+      "z": 0
     },
     "_skewX": 0,
     "_skewY": 0,
@@ -4324,6 +4324,9 @@
     },
     "ctx": {
       "__id__": 17
+    },
+    "waterRenderNode": {
+      "__id__": 10
     },
     "_id": "9efDO1bVlMopNIz8Dhgprv"
   },

@@ -30,6 +30,8 @@ export default class physicalCutting extends cc.Component {
     results: Array<cc.PhysicsRayCastResult>;
     touchStartPoint: cc.Vec2; // 触摸的起点
     touchPoint: cc.Vec2;// 当前的触摸点
+    @property(cc.Node)
+    waterRenderNode:cc.Node;
     
     // LIFE-CYCLE CALLBACKS:
 
@@ -213,6 +215,11 @@ export default class physicalCutting extends cc.Component {
                 node.getComponent(cc.RigidBody).applyLinearImpulse(new cc.Vec2(Math.random()*150-75,Math.random()*150-75),node.getComponent(cc.RigidBody).getLocalCenter(),true);
                 let polPoints = newCollider.node.getComponent(cc.PhysicsPolygonCollider).points;
                 (newCollider.node.getComponent("customMask") as customMask).updateMaskRender(polPoints);
+
+                // this.waterRenderNode.color = cc.color(Math.random()*256,Math.random()*256,Math.random()*256,255);
+
+                let t = new cc.Tween();
+                t.target(this.waterCreatorNode).to(1,{color: cc.color(Math.random()*256,Math.random()*256,Math.random()*256,255)},{progress:null,easing:cc.easing.backInOut}).start();
             }
 
         }

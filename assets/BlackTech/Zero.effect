@@ -221,7 +221,7 @@ void main () {
 
   if(ngonFill(v_uv0)){
   // if(v_uv0.y*iResolution.y > 50.0){
-  // if(v_uv0.x > pologenPoints.x){
+  // if(v_uv0.y > 0.3){
     // gl_FragColor = vec4(v_uv0.xy,0.5+0.5*sin(iTime),1.0);// r，g位置绝对，b随时间变化。
     color.a = 1.0;
   }else{

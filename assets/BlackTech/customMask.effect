@@ -247,7 +247,7 @@ void main () {
     uv.y *= -1.0; 
     // vec2 texUv = invBilinear( uv, edgePoints_1, edgePoints_2, edgePoints_3, edgePoints_4);
     if(ngonFill(uv)){  
-    // if(uv.y > 0.0){
+    // if(uv.y > 0.3){
       // color.a = 1.0;
     }else{
       color.a = 0.0;
