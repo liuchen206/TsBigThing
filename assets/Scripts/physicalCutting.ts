@@ -215,10 +215,10 @@ export default class physicalCutting extends cc.Component {
                 let polPoints = newCollider.node.getComponent(cc.PhysicsPolygonCollider).points;
                 (newCollider.node.getComponent("customMask") as customMask).updateMaskRender(polPoints);
 
-                // this.waterRenderNode.color = cc.color(Math.random()*256,Math.random()*256,Math.random()*256,255);
+                this.waterRenderNode.color = cc.color(Math.random()*256,Math.random()*256,Math.random()*256,255);
 
-                let t = new cc.Tween();
-                t.target(this.waterCreatorNode).to(1,{color: cc.color(Math.random()*256,Math.random()*256,Math.random()*256,255)},{progress:null,easing:cc.easing.backInOut}).start();
+                // let t = new cc.Tween();
+                // t.target(this.waterCreatorNode).to(1,{color: cc.color(Math.random()*256,Math.random()*256,Math.random()*256,255)},{progress:null,easing:cc.easing.backInOut}).start();
             }
 
         }
