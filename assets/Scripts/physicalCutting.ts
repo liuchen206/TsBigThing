@@ -161,15 +161,14 @@ export default class physicalCutting extends cc.Component {
 
             // keep max length points to origin collider
             (collider as unknown as cc.PolygonCollider).points = maxPointsResult;
+            let body = collider.body;
             if(cc.Intersection.pointInPolygon(new cc.Vec2(-46,0), maxPointsResult)){
                     
             }else{
                 collider.node.removeComponent(cc.RevoluteJoint);
+                body.applyLinearImpulse(new cc.Vec2(Math.random()*50-25,Math.random()*50-25),body.getLocalCenter(),true);
             }
             collider.apply();
-            let body = collider.body;
-            body.applyLinearImpulse(new cc.Vec2(Math.random()*150-75,Math.random()*150-75),body.getLocalCenter(),true);
-
             collider.node.getComponent(cc.RigidBody).type = cc.RigidBodyType.Dynamic;
             let polPoints = collider.node.getComponent(cc.PhysicsPolygonCollider).points;
             (collider.node.getComponent("customMask") as customMask).updateMaskRender(polPoints);
@@ -203,6 +202,7 @@ export default class physicalCutting extends cc.Component {
 
                 }else{
                     node.removeComponent(cc.RevoluteJoint);
+                    node.getComponent(cc.RigidBody).applyLinearImpulse(new cc.Vec2(Math.random()*50-25,Math.random()*50-25),node.getComponent(cc.RigidBody).getLocalCenter(),true);
                 }
                 node.position = body.getWorldPosition(new cc.Vec2());
                 node.angle  = -body.getWorldRotation();
@@ -212,7 +212,6 @@ export default class physicalCutting extends cc.Component {
                 newCollider.points = splitResult;
                 newCollider.apply();
 
-                node.getComponent(cc.RigidBody).applyLinearImpulse(new cc.Vec2(Math.random()*150-75,Math.random()*150-75),node.getComponent(cc.RigidBody).getLocalCenter(),true);
                 let polPoints = newCollider.node.getComponent(cc.PhysicsPolygonCollider).points;
                 (newCollider.node.getComponent("customMask") as customMask).updateMaskRender(polPoints);
 
