@@ -159,6 +159,11 @@ export default class physicalCutting extends cc.Component {
 
             // keep max length points to origin collider
             (collider as unknown as cc.PolygonCollider).points = maxPointsResult;
+            if(cc.Intersection.pointInPolygon(new cc.Vec2(-46,0), maxPointsResult)){
+                    
+            }else{
+                collider.node.removeComponent(cc.RevoluteJoint);
+            }
             collider.apply();
             let body = collider.body;
             body.applyLinearImpulse(new cc.Vec2(Math.random()*150-75,Math.random()*150-75),body.getLocalCenter(),true);
@@ -192,6 +197,11 @@ export default class physicalCutting extends cc.Component {
 
                 // create new body use Prefab
                 let node = cc.instantiate(collider.node)
+                if(cc.Intersection.pointInPolygon(new cc.Vec2(-46,0), splitResult)){
+
+                }else{
+                    node.removeComponent(cc.RevoluteJoint);
+                }
                 node.position = body.getWorldPosition(new cc.Vec2());
                 node.angle  = -body.getWorldRotation();
                 node.parent = cc.director.getScene();

@@ -1,0 +1,22 @@
+{
+  "appType": "fastgame",
+  "certificatePath": "E:\\creatorProj\\TsBigThing\\certificate.pem",
+  "deviceOrientation": "portrait",
+  "disabledMode": "",
+  "fullScreen": true,
+  "icon": "C:\\Users\\Administrator\\Desktop\\塔防头像.png",
+  "logLevel": "log",
+  "manifestPath": "",
+  "minPlatformVersion": "1036",
+  "name": "英雄与塔防",
+  "npmPath": "",
+  "package": "hw.tafang.com",
+  "privatePath": "E:\\creatorProj\\TsBigThing\\private.pem",
+  "runRelease": false,
+  "showNpmPath": true,
+  "tinyPackageMode": false,
+  "tinyPackageServer": "",
+  "useDebugKey": false,
+  "versionCode": "1",
+  "versionName": "1.0.0"
+}
