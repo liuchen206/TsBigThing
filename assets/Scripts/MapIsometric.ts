@@ -33,12 +33,12 @@ export default class MapIsometric extends cc.Component {
         this.setTile(2, 0);
         this.reorderTileZOrder(50,50);
 
-        // this.setTileSecond(0, 0);
+        this.setTileSecond(0, 0);
         // this.setTileSecond(1, 0);
-        // this.setTileSecond(0, 1);
+        this.setTileSecond(0, 1);
         // this.setTileSecond(1, 1);
-        // this.setTileSecond(2, 0);
-        // this.reorderTileSecondLayerZOrder(50,50);
+        this.setTileSecond(2, 0);
+        this.reorderTileSecondLayerZOrder(50,50);
     }
 
     // update (dt) {}
