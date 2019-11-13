@@ -13,12 +13,12 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "tile",
+    "_name": "tileSecond",
     "_objFlags": 0,
     "_parent": null,
     "_children": [],
     "_active": true,
-    "_level": 2,
+    "_level": 3,
     "_components": [
       {
         "__id__": 2
@@ -51,7 +51,7 @@
     "_position": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": 346.23,
+      "y": 0,
       "z": 0
     },
     "_scale": {
@@ -88,7 +88,7 @@
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
     "_spriteFrame": {
-      "__uuid__": "1ec5b8b6-55e3-4e67-aaa3-88679354e8fc"
+      "__uuid__": "045ede48-85c1-499e-98c1-e1dc6b0e8fcf"
     },
     "_type": 0,
     "_sizeMode": 1,
@@ -120,9 +120,9 @@
       "__id__": 1
     },
     "asset": {
-      "__uuid__": "ace19895-b0a9-4220-bdb6-1ff68f4903d4"
+      "__uuid__": "cc9d901c-536c-460a-b90b-f859b7ac180d"
     },
-    "fileId": "52RwkTxPVFmpjlUTWscl9h",
+    "fileId": "8dqsMIHxRAc5nVDsMUQNYi",
     "sync": false
   }
 ]
