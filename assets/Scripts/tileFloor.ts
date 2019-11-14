@@ -29,10 +29,14 @@ export default class tileFloor extends cc.Component {
 
     @property(cc.Label)
     someInfo: cc.Label;
+    @property(String)
+    mytag:String = "";
     // LIFE-CYCLE CALLBACKS:
 
     onLoad() {
-        this.node.on(cc.Node.EventType.TOUCH_START, this.onTouchStartCallback, this, true);
+        this.node.on(cc.Node.EventType.TOUCH_START, this.onTouchStartCallback, this,true);
+        var kkk = this.node as any;
+        kkk._touchListener.setSwallowTouches(false);
     }
 
     start() {
@@ -40,20 +44,28 @@ export default class tileFloor extends cc.Component {
     }
 
     // update (dt) {}
-
     onTouchStartCallback(event) {
-        cc.log("onTouchStartCallback pos", event.getLocation().toString(), "xIndex", this.xMapIndex, "yIndex", this.yMapIndex, "mapFloor", this.mapFloor);
-        if (this.mapFloor == 2) {
-            (cc.find("Canvas/MapIsometric").getComponent("MapIsometric") as MapIsometric).resetSelect();
-            (cc.find("Canvas/MapIsometric").getComponent("MapIsometric") as MapIsometric).currentSelectedTile = this.node;
-            this.lightUpSelect();
-            this.calculateWalkableTile();
-        }
-        if (this.mapFloor == 1) {
-            if ((cc.find("Canvas/MapIsometric").getComponent("MapIsometric") as MapIsometric).currentSelectedTile != null) {
-                let movingNode = (cc.find("Canvas/MapIsometric").getComponent("MapIsometric") as MapIsometric).currentSelectedTile;
-                (movingNode.getComponent("tileFloor") as tileFloor).moveTo(new cc.Vec2(this.xMapIndex, this.yMapIndex));
+        cc.log("onTouchStartCallback pos", event.getLocation().toString(), "xIndex", this.xMapIndex, "yIndex", this.yMapIndex, "mapFloor", this.mapFloor,this.mytag);
+        // 返回世界坐标
+        var localPos = this.node.convertToNodeSpaceAR(event.getLocation());
+        if (cc.Intersection.pointInPolygon(localPos, this.node.getComponent(cc.PolygonCollider).points)) {
+            console.log("Hit!", localPos.toString(), this.node.position.toString());
+            if (this.mapFloor == 2) {
+                (cc.find("Canvas/MapIsometric").getComponent("MapIsometric") as MapIsometric).resetSelect();
+                (cc.find("Canvas/MapIsometric").getComponent("MapIsometric") as MapIsometric).currentSelectedTile = this.node;
+                this.lightUpSelect();
+                this.calculateWalkableTile();
             }
+            if (this.mapFloor == 1) {
+                if ((cc.find("Canvas/MapIsometric").getComponent("MapIsometric") as MapIsometric).currentSelectedTile != null) {
+                    let movingNode = (cc.find("Canvas/MapIsometric").getComponent("MapIsometric") as MapIsometric).currentSelectedTile;
+                    (movingNode.getComponent("tileFloor") as tileFloor).moveTo(new cc.Vec2(this.xMapIndex, this.yMapIndex));
+                }
+            }
+            event.stopPropagationImmediate();
+        }
+        else {
+            console.log("No hit", localPos.toString(), this.node.position.toString());
         }
     }
     moveTo(pos: cc.Vec2) {
@@ -70,7 +82,7 @@ export default class tileFloor extends cc.Component {
             (cc.find("Canvas/MapIsometric").getComponent("MapIsometric") as MapIsometric).currentSelectedTile = null;
             let mapLengthX = (cc.find("Canvas/MapIsometric").getComponent("MapIsometric") as MapIsometric).mapLengthX;
             let mapLengthY = (cc.find("Canvas/MapIsometric").getComponent("MapIsometric") as MapIsometric).mapLengthY;
-            (cc.find("Canvas/MapIsometric").getComponent("MapIsometric") as MapIsometric).reorderTileSecondLayerZOrder(mapLengthX,mapLengthY);
+            (cc.find("Canvas/MapIsometric").getComponent("MapIsometric") as MapIsometric).reorderTileSecondLayerZOrder(mapLengthX, mapLengthY);
         } else {
             this.walkAbleTileIndexList.forEach(element => {
                 if (element.x == pos.x && element.y == pos.y) {
@@ -86,7 +98,7 @@ export default class tileFloor extends cc.Component {
                     (cc.find("Canvas/MapIsometric").getComponent("MapIsometric") as MapIsometric).currentSelectedTile = null;
                     let mapLengthX = (cc.find("Canvas/MapIsometric").getComponent("MapIsometric") as MapIsometric).mapLengthX;
                     let mapLengthY = (cc.find("Canvas/MapIsometric").getComponent("MapIsometric") as MapIsometric).mapLengthY;
-                    (cc.find("Canvas/MapIsometric").getComponent("MapIsometric") as MapIsometric).reorderTileSecondLayerZOrder(mapLengthX,mapLengthY);
+                    (cc.find("Canvas/MapIsometric").getComponent("MapIsometric") as MapIsometric).reorderTileSecondLayerZOrder(mapLengthX, mapLengthY);
                 }
             });
         }

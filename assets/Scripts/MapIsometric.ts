@@ -9,8 +9,8 @@ export default class MapIsometric extends cc.Component {
     tileSpriteWidth: number = 111;
     tileSpriteHeight: number = 128;
     plantformHeight: number = 65;
-    mapLengthX: number = 10;
-    mapLengthY: number = 10;
+    mapLengthX: number = 6;
+    mapLengthY: number = 6;
     tilesMapFirst: Map<string, cc.Node> = new Map<string, cc.Node>();
     tilesMapSecond: Map<string, cc.Node> = new Map<string, cc.Node>();
     currentSelectedTile: cc.Node = null;
@@ -37,6 +37,9 @@ export default class MapIsometric extends cc.Component {
         }
         this.setFirstFloor(initMap);
         this.setSecondFloor([new cc.Vec2(0, 0), new cc.Vec2(0, 1), new cc.Vec2(0, 2), new cc.Vec2(0, 3), new cc.Vec2(0, 4)]);
+
+        this.node.x = -(this.mapLengthX-1)*this.tileSpriteWidth/2;
+        this.secondTileLayer.x = this.node.x;
     }
 
     // update (dt) {}
