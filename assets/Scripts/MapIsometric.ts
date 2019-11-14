@@ -1,5 +1,5 @@
 import { MakeXYToKey } from "./Tools";
-import tileFloor from "./tileFloor";
+import tileFloor, { movingDir } from "./tileFloor";
 
 const { ccclass, property } = cc._decorator;
 
@@ -9,15 +9,18 @@ export default class MapIsometric extends cc.Component {
     tileSpriteWidth: number = 111;
     tileSpriteHeight: number = 128;
     plantformHeight: number = 65;
-    tilesMap: Map<string, cc.Node> = new Map<string, cc.Node>();
+    mapLengthX:number = 50;
+    mapLengthY:number = 50;
+    tilesMapFirst: Map<string, cc.Node> = new Map<string, cc.Node>();
     tilesMapSecond: Map<string, cc.Node> = new Map<string, cc.Node>();
+    currentSelectedTile:cc.Node = null;
 
     @property(cc.Prefab)
     tilePrefab: cc.Prefab;
     @property(cc.Prefab)
     tilePrefabSecond: cc.Prefab;
     @property(cc.Node)
-    secondTileLayer:cc.Node;
+    secondTileLayer: cc.Node;
     // LIFE-CYCLE CALLBACKS:
 
     onLoad() {
@@ -26,49 +29,54 @@ export default class MapIsometric extends cc.Component {
     }
 
     start() {
-        this.setTile(0, 0);
-        this.setTile(1, 0);
-        this.setTile(0, 1);
-        this.setTile(1, 1);
-        this.setTile(2, 0);
-        this.reorderTileZOrder(50,50);
-
-        this.setTileSecond(0, 0);
-        // this.setTileSecond(1, 0);
-        this.setTileSecond(0, 1);
-        // this.setTileSecond(1, 1);
-        this.setTileSecond(2, 0);
-        this.reorderTileSecondLayerZOrder(50,50);
+        this.setFirstFloor([new cc.Vec2(0, 0),new cc.Vec2(0, 1),new cc.Vec2(0, 2),new cc.Vec2(1, 1),new cc.Vec2(1, 2),new cc.Vec2(1, 3),new cc.Vec2(1, 4),new cc.Vec2(1, 0),new cc.Vec2(2, 0)]);
+        this.setSecondFloor([new cc.Vec2(0, 0),new cc.Vec2(0, 1)]);
     }
 
     // update (dt) {}
-
-    resetSelect(){
-        this.tilesMap.forEach((value , key) => {
-            let tile = value;
-            (tile.getComponent("tileFloor") as tileFloor).lightUp(false);
+    setFirstFloor(indexList: Array<cc.Vec2>) {
+        indexList.forEach(pos => {
+            this.setTileFirst(pos);
         });
-        this.tilesMapSecond.forEach((value , key) => {
+        this.reorderTileFirstZOrder(this.mapLengthX, this.mapLengthY);
+    }
+    setSecondFloor(indexList: Array<cc.Vec2>) {
+        indexList.forEach(pos => {
+            this.setTileSecond(pos);
+        });
+        this.reorderTileSecondLayerZOrder(this.mapLengthX, this.mapLengthY);
+    }
+    resetSelect() {
+        this.tilesMapFirst.forEach((value, key) => {
             let tile = value;
-            (tile.getComponent("tileFloor") as tileFloor).lightUp(false);
+            (tile.getComponent("tileFloor") as tileFloor).lightDown();
+        });
+        this.tilesMapSecond.forEach((value, key) => {
+            let tile = value;
+            (tile.getComponent("tileFloor") as tileFloor).lightDown();
         });
     }
 
-    setTile(x: number, y: number) {
+    setTileFirst(pos: cc.Vec2) {
+        let x = pos.x;
+        let y = pos.y;
         let tile = cc.instantiate(this.tilePrefab);
         (tile.getComponent("tileFloor") as tileFloor).xMapIndex = x;
         (tile.getComponent("tileFloor") as tileFloor).yMapIndex = y;
         (tile.getComponent("tileFloor") as tileFloor).mapFloor = 1;
         tile.parent = this.node;
         this.setTilePostion(tile, x, y);
-        this.tilesMap.set(MakeXYToKey(x, y), tile);
+        this.tilesMapFirst.set(MakeXYToKey(x, y), tile);
         return tile;
     }
-    setTileSecond(x: number, y: number) {
+    setTileSecond(pos: cc.Vec2) {
+        let x = pos.x;
+        let y = pos.y;
         let tile = cc.instantiate(this.tilePrefabSecond);
         (tile.getComponent("tileFloor") as tileFloor).xMapIndex = x;
         (tile.getComponent("tileFloor") as tileFloor).yMapIndex = y;
         (tile.getComponent("tileFloor") as tileFloor).mapFloor = 2;
+        (tile.getComponent("tileFloor") as tileFloor).movingDir = movingDir.xAxis;
         tile.parent = this.secondTileLayer;
         this.setTilePostion(tile, x, y);
         this.tilesMapSecond.set(MakeXYToKey(x, y), tile);
@@ -83,15 +91,16 @@ export default class MapIsometric extends cc.Component {
     setTilePostion(tileNode: cc.Node, x: number, y: number) {
         tileNode.position = this.convertIndexToPostion(x, y);
     }
-    reorderTileZOrder(xMax: number, yMax: number) {
+    reorderTileFirstZOrder(xMax: number, yMax: number) {
         // 远处的要后绘制
         let limitCounter = 0;
         for (let x = 0; x < xMax; x++) {
-            limitCounter += xMax;
+            limitCounter += yMax;
             for (let y = 0; y < yMax; y++) {
-                let targetTile = this.tilesMap.get(MakeXYToKey(x, y));
-                if(targetTile){
+                let targetTile = this.tilesMapFirst.get(MakeXYToKey(x, y));
+                if (targetTile) {
                     targetTile.zIndex = limitCounter;
+                    (targetTile.getComponent("tileFloor") as tileFloor).setInof(limitCounter + "");
                     limitCounter--;
                 }
             }
@@ -101,10 +110,10 @@ export default class MapIsometric extends cc.Component {
         // 远处的要后绘制
         let limitCounter = 0;
         for (let x = 0; x < xMax; x++) {
-            limitCounter += xMax;
+            limitCounter += yMax;
             for (let y = 0; y < yMax; y++) {
                 let targetTile = this.tilesMapSecond.get(MakeXYToKey(x, y));
-                if(targetTile){
+                if (targetTile) {
                     targetTile.zIndex = limitCounter;
                     limitCounter--;
                 }
