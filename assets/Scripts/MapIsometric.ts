@@ -9,11 +9,11 @@ export default class MapIsometric extends cc.Component {
     tileSpriteWidth: number = 111;
     tileSpriteHeight: number = 128;
     plantformHeight: number = 65;
-    mapLengthX:number = 50;
-    mapLengthY:number = 50;
+    mapLengthX: number = 10;
+    mapLengthY: number = 10;
     tilesMapFirst: Map<string, cc.Node> = new Map<string, cc.Node>();
     tilesMapSecond: Map<string, cc.Node> = new Map<string, cc.Node>();
-    currentSelectedTile:cc.Node = null;
+    currentSelectedTile: cc.Node = null;
 
     @property(cc.Prefab)
     tilePrefab: cc.Prefab;
@@ -29,8 +29,14 @@ export default class MapIsometric extends cc.Component {
     }
 
     start() {
-        this.setFirstFloor([new cc.Vec2(0, 0),new cc.Vec2(0, 1),new cc.Vec2(0, 2),new cc.Vec2(1, 1),new cc.Vec2(1, 2),new cc.Vec2(1, 3),new cc.Vec2(1, 4),new cc.Vec2(1, 0),new cc.Vec2(2, 0)]);
-        this.setSecondFloor([new cc.Vec2(0, 0),new cc.Vec2(0, 1)]);
+        let initMap = [];
+        for (var i = 0; i < this.mapLengthX; i++) {
+            for (var j = 0; j < this.mapLengthY; j++) {
+                initMap.push(new cc.Vec2(i, j));
+            }
+        }
+        this.setFirstFloor(initMap);
+        this.setSecondFloor([new cc.Vec2(0, 0), new cc.Vec2(0, 1), new cc.Vec2(0, 2), new cc.Vec2(0, 3), new cc.Vec2(0, 4)]);
     }
 
     // update (dt) {}
@@ -76,7 +82,17 @@ export default class MapIsometric extends cc.Component {
         (tile.getComponent("tileFloor") as tileFloor).xMapIndex = x;
         (tile.getComponent("tileFloor") as tileFloor).yMapIndex = y;
         (tile.getComponent("tileFloor") as tileFloor).mapFloor = 2;
-        (tile.getComponent("tileFloor") as tileFloor).movingDir = movingDir.xAxis;
+        if (y == 0) {
+            (tile.getComponent("tileFloor") as tileFloor).movingDir = movingDir.xAxis;
+        } else if (y == 1) {
+            (tile.getComponent("tileFloor") as tileFloor).movingDir = movingDir.yAxis;
+        } else if (y == 2) {
+            (tile.getComponent("tileFloor") as tileFloor).movingDir = movingDir.LeftRightAxis;
+        } else if (y == 3) {
+            (tile.getComponent("tileFloor") as tileFloor).movingDir = movingDir.UpDownAxis;
+        } else if (y == 4) {
+            (tile.getComponent("tileFloor") as tileFloor).movingDir = movingDir.any;
+        }
         tile.parent = this.secondTileLayer;
         this.setTilePostion(tile, x, y);
         this.tilesMapSecond.set(MakeXYToKey(x, y), tile);
@@ -100,7 +116,8 @@ export default class MapIsometric extends cc.Component {
                 let targetTile = this.tilesMapFirst.get(MakeXYToKey(x, y));
                 if (targetTile) {
                     targetTile.zIndex = limitCounter;
-                    (targetTile.getComponent("tileFloor") as tileFloor).setInof(limitCounter + "");
+                    // (targetTile.getComponent("tileFloor") as tileFloor).setInof(limitCounter + "");
+                    (targetTile.getComponent("tileFloor") as tileFloor).setInof("(" + x + "," + y + ")");
                     limitCounter--;
                 }
             }
